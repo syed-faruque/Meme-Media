@@ -1,0 +1,1 @@
+This is a social media website where users can post funny jokes or like and comment on other posts they see. The frontend of this application was built using React. The website makes requests to a backend Node Js server that contacts a SQL database.
