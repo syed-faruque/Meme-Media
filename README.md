@@ -1,1 +1,3 @@
-This is a social media website where users can post funny jokes or like and comment on other posts they see. The frontend of this application was built using React and the backend Node. All data is stored and accessed through a mySQL database.
+This is a social media website where users can post memes. This web application has a React frontend and a Node Js backend. The Node Js backend is also connected to a mySQL database.
+
+In the backend folder, the server.js file contains the server code. In the frontend folder, all the react components can be found in src. App.jsx manages routing.
