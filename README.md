@@ -1,4 +1,4 @@
-Link to YT video: https://www.youtube.com/watch?v=nKe-ykLFrHo
+Link to YT video: https://www.youtube.com/watch?v=-SGbkKZi2xs&t=6s
 
 This is a social media website where users can post memes. This web application has a React frontend and a Node Js backend. The Node Js backend is also connected to a mySQL database.
 
