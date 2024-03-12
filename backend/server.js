@@ -1,3 +1,4 @@
+//library imports
 const express = require("express")
 const cors = require("cors")
 const session = require("express-session")
@@ -5,33 +6,39 @@ const sql = require("mysql2");
 const multer = require("multer")
 const app = express();
 
+//middleware
 app.use(cors({ origin: ["http://192.168.0.202:5173"], methods: ["POST", "GET"], credentials: true }))
 app.use(express.urlencoded({ extended: true }))
 app.use(session({ secret: "secret", resave: false, saveUninitialized: false }))
 app.use(express.json())
 app.use(express.static("assets"));
 
+//setting up multer to store files in assets folder
 const storage = multer.diskStorage({
     destination: function (req, file, cb) {return cb(null, "assets")}, 
     filename: function (req, file, cb) {return cb(null, file.originalname)}
 })
-
 const upload = multer({ storage })
 
-const connection = sql.createConnection({host: "localhost", user: "root", password: "", database: "storage"})
 
+//creating a connection to the database
+const connection = sql.createConnection({host: "localhost", user: "root", password: "", database: "storage"})
 connection.connect((err) => {
     if (err) {
         console.error('error connecting to database: ' + err.stack);
     }
 });
 
+
+//creating necessary tables if they aren't there
 connection.query("CREATE TABLE IF NOT EXISTS accounts (username varchar(255), password varchar(255), email varchar(255));");
 connection.query("CREATE TABLE IF NOT EXISTS user_posts (users varchar(255), files varchar(255), captions text, likes int, dates varchar(255));");
 connection.query("CREATE TABLE IF NOT EXISTS comment_section (owners varchar(255), files varchar(255), commenters varchar(255), comments text, dates varchar(255));");
 connection.query("CREATE TABLE IF NOT EXISTS like_table (owners varchar(255), files varchar(255), likers varchar(255));");
 connection.query("CREATE TABLE IF NOT EXISTS notifications (users varchar(255), notifications text);");
 
+
+//endpoint for storing signup credentials
 app.post('/signup', (req, res) => {
     const email = req.body.email;
     const username = req.body.username;
@@ -53,6 +60,8 @@ app.post('/signup', (req, res) => {
     });
 });
 
+
+//endpoint for checking if login data matches a database table row
 app.post('/login', (req, res) => {
     const email = req.body.email;
     const password = req.body.password;
@@ -71,10 +80,14 @@ app.post('/login', (req, res) => {
     });
 });
 
+
+//endpoint for receiving userdata
 app.get('/getinfo', (req, res) => {
     res.json({ user: req.session.username, email: req.session.email })
 })
 
+
+//endpoint for file uploads
 app.post('/upload', upload.single('file'), (req, res) => {
     const user = req.session.username;
     const path = req.file.path;
@@ -88,6 +101,7 @@ app.post('/upload', upload.single('file'), (req, res) => {
     });
 })
 
+//endpoint for receiving the list of everysingle post and their data
 app.get("/getfeeds", (req, res) => {
     let feed = [];
     connection.query("select users, files, captions, likes, dates from user_posts", (error, results) => {
@@ -101,12 +115,14 @@ app.get("/getfeeds", (req, res) => {
     })
 })
 
+//endpoint to set session variables
 app.post("/viewpost", (req, res) => {
     req.session.viewuser = req.body.user;
     req.session.viewfile = req.body.file;
     res.json({ valid: true });
 })
 
+//endpoint to receive specific post data
 app.get("/getpost", (req, res) => {
     connection.query("select * from user_posts where users = ? and files = ?", [req.session.viewuser, req.session.viewfile], (error, results) => {
         if (error) {
@@ -116,6 +132,7 @@ app.get("/getpost", (req, res) => {
     })
 })
 
+//endpoint to add a comment to the comment database table
 app.post("/addcomment", (req, res) => {
     const commenter = req.session.username;
     const owner = req.session.viewuser;
@@ -131,6 +148,7 @@ app.post("/addcomment", (req, res) => {
     });
 })
 
+//endpoint to receive all the comments for a specific post that the current user is viewing
 app.get("/getcomments", (req, res) => {
     connection.query("select * from comment_section where owners = ? and files = ?", [req.session.viewuser, req.session.viewfile], (error, results) => {
         if (error) {
@@ -141,6 +159,7 @@ app.get("/getcomments", (req, res) => {
     })
 })
 
+//endpoint to increment the value for likes in the like database table
 app.post("/likepost", (req, res) => {
     const liker = req.session.username;
     const owner = req.body.user;
@@ -163,6 +182,7 @@ app.post("/likepost", (req, res) => {
     })
 })
 
+//endpoint to receive all notifications for the current user
 app.get("/getnotifications", (req, res) => {
     const user = req.session.username;
     connection.query("select * from notifications where users = ?", [user], (error, results) => {
@@ -174,6 +194,7 @@ app.get("/getnotifications", (req, res) => {
     })
 })
 
+//endpoint to receive all users that match a search value
 app.post("/searchusers", (req, res) => {
     const search = req.body.search + "%";
     connection.query("select * from accounts where username like ?", [search], (error, results) => {
@@ -186,6 +207,7 @@ app.post("/searchusers", (req, res) => {
     })
 })
 
+//endpoint to receive the current user's username and posts
 app.get("/getuserdata", (req, res) => {
     const username = req.session.username;
     connection.query("select * from user_posts where users = ?", [username], (error, results) => {
@@ -197,6 +219,7 @@ app.get("/getuserdata", (req, res) => {
     })
 })
 
+//endpoint to receive a specific user's username and posts
 app.post("/viewprofile", (req, res) => {
     const username = req.body.username;
     connection.query("select * from user_posts where users = ?", [username], (error, results) => {
@@ -208,10 +231,12 @@ app.post("/viewprofile", (req, res) => {
     })
 })
 
+//endpoint to receive search results
 app.get("/getsearchresults", (req, res) => {
     res.json(req.session.searchresults);
 })
 
+//making the server listen on port 1111
 app.listen(1111, "0.0.0.0", () => {
     console.log("Running.......")
 });
