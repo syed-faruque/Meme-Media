@@ -1,6 +1,9 @@
+//necessary imports
 import { useEffect, useState } from "react";
 import axios from "axios";
 import Navbar from "./Navbar";
+
+//giving axios permission to make requests to my server
 axios.defaults.withCredentials = true;
 
 const Comments = () => {
@@ -9,6 +12,7 @@ const Comments = () => {
     const [newcomments, setNewcomments] = useState([]);
     const [oldcomments, setOldcomments] = useState([]);
 
+    //fetches the post and its caption from the server
     const fetchPostContents = () => {
         axios.get("http://192.168.0.202:1111/getpost")
             .then((response) => {
@@ -16,7 +20,8 @@ const Comments = () => {
             })
             .catch(error => console.error("Error fetching post contents:", error));
     }
-
+    
+    //fetches the old comments that were made to the post from the server
     const fetchOldcomments = () => {
         axios.get("http://192.168.0.202:1111/getcomments")
             .then((response) => {
@@ -25,10 +30,12 @@ const Comments = () => {
             .catch(error => console.error("Error fetching old comments:", error));
     }
 
+    //updates the currentcomment state
     const handleChange = (event) => {
         setCurrentcomment(event.target.value);
     }
 
+    //when the user posts the comment, this sends the comment data over to the serverside
     const handleSubmit = (event) => {
         event.preventDefault();
         axios.post("http://192.168.0.202:1111/addcomment", { comment: currentcomment })
@@ -48,6 +55,7 @@ const Comments = () => {
         return <div>Loading...</div>;
     }
 
+    //below I put the post contents on the top and the comments underneath. New comments are placed above old comments.
     return (
         <div className="commentsection">
             <Navbar /><br /><br />
