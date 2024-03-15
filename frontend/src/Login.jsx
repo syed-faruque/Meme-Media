@@ -8,16 +8,19 @@ axios.defaults.withCredentials = true;
 
 const Login = () => {
 
+    //creating usestates for variables I wanna keep track of
     const [info, setInfo] = useState({email: "", password: ""});
     const [error, setError] = useState('');
     const navigate = useNavigate();
 
+    //function for updating the usestate variables
     const handleChange = (event) => {
         const type = event.target.name;
         const value = event.target.value;
         setInfo(previnfo => ({...previnfo, [type]: value}))
     }
 
+    //function for passing on the formdata to the server
     const handleSubmit = (event) => {
         event.preventDefault();
         axios.post("http://192.168.0.202:1111/login", info)
