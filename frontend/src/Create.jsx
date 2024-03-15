@@ -6,10 +6,12 @@ axios.defaults.withCredentials = true;
 
 const Create = () => {
 
+    //creating a usestate for every variable I want to update
     const [file, setFile] = useState()
     const [caption, setCaption] = useState()
     const navigate = useNavigate()
 
+    //function for creating a object containing the file and caption, and passing it over to the server
     const upload = () => {
         const formData = new FormData()
         formData.append('file', file)
