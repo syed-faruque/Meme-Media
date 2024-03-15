@@ -8,6 +8,7 @@ axios.defaults.withCredentials = true;
 
 const Navbar = () => {
     const navigate = useNavigate();
+    //creating a usestate for variables related to the user's search. These should always be up to date.
     const [search, setSearch] = useState("");
     const [searchResults, setSearchResults] = useState([]);
 
@@ -23,6 +24,7 @@ const Navbar = () => {
 
     }, []);
 
+    //function for updating the search usestate variable.
     const handleChange = (event) => {
         const value = event.target.value;
         setSearch(value);
@@ -32,6 +34,7 @@ const Navbar = () => {
             })
     }
 
+    //function that brings the user to the search results if they press enter. This requires a request containing the search data to the server. The server gives back the search results, and it is captured here.
     const handleKeyPress = (event) => {
         if (event.key === 'Enter') {
             event.preventDefault();
@@ -50,6 +53,7 @@ const Navbar = () => {
     };
 
 
+    // if the user selects a certain user in the dropdown, this navigates them to the endpoint containing that username. 
     const handleResultsClick = (index) => {
         navigate(`/${searchResults[index]}`)
         setSearchResults([]);
@@ -59,6 +63,8 @@ const Navbar = () => {
         handleChange(event);
     }
 
+
+    //the naivagtion bar is essentially a button that leads to every main endpoint
     return (
         <div className="navbar">
             <label>Meme Media</label>
