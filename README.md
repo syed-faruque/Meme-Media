@@ -1,4 +1,11 @@
 # Meme Media
-Social media platform for meme content.
+Social media website for meme content.
 
-I created this website application using React.js for the clientside and Node.js for the server. This site also has connection to a SQL database.
+Frontend
+- this folder contains all the react components that are rendered when a user navigates throughout the site
+
+Backend
+- server.js contains the serverside code
+
+SQL
+-the serverside code contains a SQL database connection for creating and querying tables inside a pre-established database
