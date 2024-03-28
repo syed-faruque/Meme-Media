@@ -31,7 +31,7 @@ const Comments = () => {
             .catch(error => console.error("Error fetching old comments:", error));
     }
 
-    //function for updating the state of the current comment when he types it
+    //function for updating the state of the current comment when user types it
     const handleChange = (event) => {
         setCurrentcomment(event.target.value);
     }
