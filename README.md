@@ -8,4 +8,4 @@ Backend
 - server.js contains the serverside code
 
 SQL
--the serverside code contains a SQL database connection for creating and querying tables inside a pre-established database
+- the serverside code contains a SQL database connection for creating and querying tables inside a pre-established database
