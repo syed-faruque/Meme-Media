@@ -1,0 +1,450 @@
+body {
+    background-color: #f0f2f5; /* Light grey */
+}
+
+/* Styles for login and sign up pages */
+.login, .signup {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+.loginmessage, .signupmessage {
+    text-align: center;
+}
+
+.loginform, .signupform {
+    text-align: center;
+    background-color: #ffffff;
+    padding: 20px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    max-width: 500px;
+    width: 100%;
+}
+
+.loginform input, .signupform input {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 10px;
+    border: 1px solid #ccc;
+    box-sizing: border-box;
+}
+
+.loginform input[type="submit"], .signupform input[type="submit"] {
+    color: white;
+    background-color: #4267B2;
+}
+
+.loginform input[type="submit"]:hover,
+.signupform input[type="submit"]:hover {
+    background-color: #3b5998;
+    cursor: pointer;
+}
+
+/* Styles for feeds and comment section */
+.home {
+    text-align: center;
+}
+
+.feedcontents {
+    width: 600px;
+    padding-top: 50px;
+    margin: auto;
+}
+
+.feed-post, .viewpost {
+    padding-top: 10px;
+    margin-bottom: 20px;
+    border-radius: 5px;
+    background-color: #ffffff;
+}
+
+.feed-post .post-header, .viewpost .post-header {
+    text-align: left;
+    margin-left: 20px;
+    margin-right: 20px;
+}
+.feed-post .post-header .username, .viewpost .post-header .username {
+    font-size: 18px;
+    font-family: Arial, sans-serif;
+    font-weight: bold;
+    color: #333;
+}
+
+.feed-post .post-header .date, .viewpost .post-header .date {
+    font-size: 10px;
+}
+
+.divider {
+    border-bottom: 1px solid #ccc;
+}
+
+.feed-post img, .createoptions img {
+    display: block;
+    width: 550px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.feed-post .post-body {
+    text-align: left;
+}
+
+.feed-post .post-body .like-num {
+    font-size: 14px;
+    color: #666;
+    margin-left: 20px;
+    text-align: left;
+}
+
+.feed-post .post-body .caption,
+.viewpost .post-body .caption {
+    word-wrap: break-word;
+    text-align: left;
+    margin-left: 20px;
+    margin-right: 5px;
+}
+
+.feed-post .post-footer {
+    margin-left: 20px;
+    margin-right: 20px;
+    border-top: 1px solid #ccc;
+    padding-bottom: 15px;
+}
+
+.feed-post .post-footer button {
+    font-size: 15px;
+    color: grey;
+    border: none;
+    background-color: #ffffff;
+    padding: 8px 40px;
+    border-radius: 5px;
+    cursor: pointer;
+    margin-top: 10px;
+}
+
+.feed-post .post-footer button:hover {
+    background-color: #f0f2f5;
+}
+
+/* Comment section styles */
+.commentsection {
+    margin: auto;
+    padding-top: 30px;
+    padding-bottom: 15px;
+    background-color: #ffffff;
+    width: 600px;
+}
+
+.viewpost img {
+    display: block;
+    width: 550px;
+    margin: 0 auto;
+}
+
+.usercomment input[type="text"] {
+    margin-left: 20px;
+    width: 67%;
+    margin-right: 10px;
+    padding: 10px;
+    border: 1px solid #ccc;
+}
+
+.usercomment input[type="submit"] {
+    padding: 10px 20px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    cursor: pointer;
+    background-color: #4267B2;
+    color: white;
+    margin-bottom: 20px;
+}
+
+.usercomment input[type="submit"]:hover {
+    background-color: #3b5998;
+}
+
+.comments .newcomment,
+.comments .oldcomment {
+    margin-top: 10px;
+    padding-top: 5px;
+    padding-bottom: 5px;
+    border-radius: 5px;
+    margin-left: 20px;
+    margin-right: 20px;
+    margin-bottom: 20px;
+    background-color: #f0f2f5;
+}
+
+.comments .commenter {
+    margin-left: 10px;
+    font-weight: bold;
+    color: #333;
+}
+
+.comments .comment {
+    margin-left: 10px;
+    font-size: 14px;
+}
+
+.comments .date {
+    margin-left: 10px;
+    color: #888;
+    font-size: 12px;
+}
+
+/* Styles for create */
+.create-contents {
+    text-align: center;
+    padding-top: 60px;
+}
+
+.create-contents .create-caption textarea {
+    width: 60%;
+    height: 150px;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    resize: vertical;
+    box-sizing: border-box;
+    font-family: Arial, sans-serif;
+    font-size: 16px;
+    line-height: 1.5;
+}
+
+.create-contents .create-caption input[type="file"] {
+    color: transparent;
+}
+
+.create-contents .create-caption input[type="file"]::-webkit-file-upload-button,
+.create-contents .create-caption button {
+    margin-left: 60px;
+    width: 150px;
+    color: white;
+    background-color: #4267B2;
+    padding: 15px 15px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.create-contents .create-caption button {
+    margin: 0 auto;
+}
+
+.create-contents .create-caption input[type="file"]::-webkit-file-upload-button:hover,
+.create-contents .create-caption button:hover {
+    background-color: #3b5998;
+    cursor: pointer;
+}
+
+.create-contents .create-image img {
+    max-width: 400px;
+    padding-bottom: 20px;
+    margin: auto;
+}
+
+/* Navbar Styles */
+.navbar {
+    position: fixed;
+    top: 0;
+    z-index: 2;
+    left: 0;
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background-color: #4267B2;
+    padding: 10px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.navbar label {
+    font-size: 24px;
+    color: white;
+}
+
+.navbar .searchfeatures {
+    position: relative;
+    margin-right: auto;
+    margin-left: 16px;
+    flex: 0.28;
+}
+
+.navbar .searchfeatures input {
+    background-color: #f0f2f5;
+    border-radius: 15px;
+    width: 100%;
+    border: none;
+    padding: 10px;
+}
+
+.navsearchresults {
+    text-align: left;
+    position: absolute;
+    top: calc(100% + 5px);
+    left: 0;
+    width: 107%;
+    background-color: #f0f2f5;
+    border-radius: 5px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    z-index: 1;
+    max-height: 300px;
+    overflow-y: auto;
+}
+
+.navsearchresults .results {
+    padding: 10px;
+    border-bottom: 1px solid #ddd;
+    cursor: pointer;
+}
+
+.navsearchresults .results:hover {
+    background-color: #e9ebee;
+}
+
+.navsearchresults .results:last-child {
+    border-bottom: none;
+}
+
+.navbar button {
+    background-color: #4267B2;
+    color: white;
+    border: none;
+    padding: 8px 8px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-family: Arial, sans-serif;
+}
+
+.navbar button:last-child {
+    margin-right: 25px;
+}
+
+.navbar button:hover {
+    background-color: #3b5998;
+}
+
+/* Profile page styles */
+.profile-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto;
+    max-width: 845px;
+}
+
+.profile-info {
+    margin-top: 20px;
+}
+
+.info-username {
+    font-size: 36px;
+    font-family: 'Roboto', sans-serif;
+    font-weight: bold;
+    color: #333;
+    text-transform: uppercase;
+    margin-bottom: 10px;
+    letter-spacing: 2px;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+}
+
+.profile-divider {
+    width: 100%;
+    border-bottom: 1px solid #ccc;
+}
+
+.user-posts {
+    display: flex;
+    flex-wrap: wrap;
+    margin-top: 20px;
+    margin-left: -5px;
+    margin-right: -5px;
+}
+
+.post-image {
+    margin: 5px;
+    cursor: pointer;
+    width: 275px;
+    height: 300px;
+    overflow: hidden;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.post-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.2s ease-in-out;
+}
+
+.post-image img:hover {
+    transform: scale(1.05);
+    overflow: hidden;
+}
+
+/* Notification styles */
+.notifications-container {
+    margin: 20px auto;
+    max-width: 800px;
+    padding: 20px;
+    background-color: #ffffff;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.notifications {
+    margin-top: 20px;
+}
+
+.notifications-heading {
+    font-size: 24px;
+    margin-bottom: 15px;
+}
+
+.notification {
+    background-color: #f0f2f5;
+    padding: 15px;
+    border-radius: 5px;
+    margin-bottom: 10px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    transition: background-color 0.3s ease;
+}
+
+.notification:hover {
+    background-color: #e9ebee;
+    cursor: pointer;
+}
+
+/* Search Styles */
+.searchresults-container {
+    margin: 20px auto;
+    max-width: 520px;
+    padding: 20px;
+    background-color: #ffffff;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.searchmessage-heading {
+    font-size: 24px;
+}
+
+.user {
+    background-color: #f0f2f5;
+    padding: 15px;
+    border-radius: 5px;
+    margin-bottom: 10px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    transition: background-color 0.3s ease;
+}
+
+.user:hover {
+    background-color: #e9ebee;
+    cursor: pointer;
+}
+    
