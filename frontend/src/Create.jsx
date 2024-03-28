@@ -4,15 +4,16 @@ import {useState} from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 
-//
+//makes credentials visible for all requests sent out by axios
 axios.defaults.withCredentials = true;
 
+//create component
 const Create = () => {
-
     const [file, setFile] = useState()
     const [caption, setCaption] = useState()
     const navigate = useNavigate()
 
+    //function for sending uploaded file to the serverside
     const upload = () => {
         const formData = new FormData()
         formData.append('file', file)
@@ -25,6 +26,8 @@ const Create = () => {
         )
         .catch(error => console.error("Error fetching info:", error));
     }
+
+    //displays a box for the user to write a caption followed by a button to choose a file. Once a file is chosen, the choose file button goes away, and the file is portayed followed by a button to upload it.
     return(
         <div className="create">
             <Navbar /><br></br><br></br>
