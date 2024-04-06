@@ -13,21 +13,21 @@ import UserProfile from "./UserProfile";
 //creates a seperate path for each component
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 const App = () => {
-        return(
-                <BrowserRouter>
-                        <Routes>
-                                <Route path = "/" element = {<Login/>}></Route>
-                                <Route path = "/signup" element = {<Signup/>}></Route>
-                                <Route path = "/success" element = {<Success/>}></Route>
-                                <Route path = "/home" element = {<Home/>}></Route>
-                                <Route path = "/create" element = {<Create/>}></Route>
-                                <Route path = "/profile" element = {<Profile/>}></Route>
-                                <Route path = "/search" element = {<Search/>}></Route>
-                                <Route path = "/comments" element = {<Comments/>}></Route>
-                                <Route path = "/notifications" element = {<Notifications/>}></Route>
-                                <Route path = "/:username" element = {<UserProfile/>}></Route>
-                        </Routes>
-                </BrowserRouter>
-        )
-    }
+    return(
+        <BrowserRouter>
+            <Routes>
+                <Route path = "/" element = {<Login/>}></Route>
+                <Route path = "/signup" element = {<Signup/>}></Route>
+                <Route path = "/success" element = {<Success/>}></Route>
+                <Route path = "/home" element = {<Home/>}></Route>
+                <Route path = "/create" element = {<Create/>}></Route>
+                <Route path = "/profile" element = {<Profile/>}></Route>
+                <Route path = "/search" element = {<Search/>}></Route>
+                <Route path = "/comments" element = {<Comments/>}></Route>
+                <Route path = "/notifications" element = {<Notifications/>}></Route>
+                <Route path = "/:username" element = {<UserProfile/>}></Route>
+            </Routes>
+        </BrowserRouter>
+    )
+}
 export default App;
