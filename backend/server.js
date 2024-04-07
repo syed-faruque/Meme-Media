@@ -125,10 +125,10 @@ app.get("/getfeeds", (req, res) => {
         let feed = [];
         connection.query("select users, files, captions, likes, dates, post_ids from user_posts", (error, results) => {
                 if (error) {
-                    res.status(500).json({ error: 'internal server error' });
+                        res.status(500).json({ error: 'internal server error' });
                 }
                 if (results) {
-                    feed = results.map(post => [post.users, post.files, post.captions, post.likes, post.dates, post.post_ids]);
+                        feed = results.map(post => [post.users, post.files, post.captions, post.likes, post.dates, post.post_ids]);
                 }
                 res.json(feed);
         })
