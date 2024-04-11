@@ -32,7 +32,7 @@ const connection = sql.createConnection({
 })
 
 //creates necessary tables
-const createTablesQuery = `
+const createTables = `
         CREATE TABLE IF NOT EXISTS accounts (
                 username varchar(255),
                 password varchar(255),
@@ -67,7 +67,7 @@ const createTablesQuery = `
         );
 `;
 
-connection.query(createTablesQuery, function(error, result, fields) {
+connection.query(createTables, function(error, result, fields) {
         if (error) {
                 console.log("Failed to create tables: " + error.message);
         }
