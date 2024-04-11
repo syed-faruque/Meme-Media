@@ -34,36 +34,36 @@ const connection = sql.createConnection({
 //creates necessary tables
 const createTables = `
         CREATE TABLE IF NOT EXISTS accounts (
-                username varchar(255),
-                password varchar(255),
-                email varchar(255)
+                username VARCHAR(255),
+                password VARCHAR(255),
+                email VARCHAR(255)
         );
     
         CREATE TABLE IF NOT EXISTS user_posts (
-                users varchar(255),
-                files varchar(255),
-                captions text,
-                likes int,
-                dates varchar(255),
-                post_ids varchar(255)
+                users VARCHAR(255),
+                files VARCHAR(255),
+                captions TEXT,
+                likes INT,
+                dates VARCHAR(255),
+                post_ids VARCHAR(255)
         );
     
         CREATE TABLE IF NOT EXISTS comment_section (
-                commenters varchar(255),
-                comments text,
-                dates varchar(255),
-                post_ids varchar(255)
+                commenters VARCHAR(255),
+                comments TEXT,
+                dates VARCHAR(255),
+                post_ids VARCHAR(255)
         );
     
         CREATE TABLE IF NOT EXISTS like_table (
-                owners varchar(255),
-                post_ids varchar(255),
-                likers varchar(255)
+                owners VARCHAR(255),
+                post_ids VARCHAR(255),
+                likers VARCHAR(255)
         );
     
         CREATE TABLE IF NOT EXISTS notifications (
-                users varchar(255),
-                notifications text
+                users VARCHAR(255),
+                notifications TEXT
         );
 `;
 
@@ -78,17 +78,17 @@ app.post('/signup', (req, res) => {
         const email = req.body.email;
         const username = req.body.username;
         const password = req.body.password;
-        connection.query("select * from accounts where email = ? or username = ?", [email, username], (error, results) => {
+        connection.query("SELECT * FROM accounts WHERE email = ? OR username = ?", [email, username], (error, results) => {
                 if (error) {
-                        res.status(500).json({ error: 'internal server Error' });
+                        res.status(500).json({ error: 'Internal Server Error' });
                 }
                 if (results.length > 0) {
                         res.json({ valid: false });
                 } 
                 else {
-                        connection.query("insert into accounts (email, username, password) values (?, ?, ?)", [email, username, password], (err) => {
+                        connection.query("INSERT INTO accounts (email, username, password) VALUES (?, ?, ?)", [email, username, password], (err) => {
                                 if (err) {
-                                        res.status(500).json({ error: 'internal server Error' });
+                                        res.status(500).json({ error: 'Internal Server Error' });
                                 }
                                 res.json({ valid: true });
                         });
@@ -100,9 +100,9 @@ app.post('/signup', (req, res) => {
 app.post('/login', (req, res) => {
         const email = req.body.email;
         const password = req.body.password;
-        connection.query("select * from accounts where email = ? and password = ?", [email, password], (error, results) => {
+        connection.query("SELECT * FROM accounts WHERE email = ? AND password = ?", [email, password], (error, results) => {
                 if (error) {
-                        res.status(500).json({ error: 'internal server error' });
+                        res.status(500).json({ error: 'Internal Server Error' });
                         return;
                 }
                 if (results.length > 0) {
@@ -127,9 +127,9 @@ app.post('/upload', upload.single('file'), (req, res) => {
         const caption = req.body.caption;
         const date = new Date().toISOString().slice(0, 10);
         const id = uuid();
-        connection.query("insert into user_posts (users, files, captions, likes, dates, post_ids) values (?,?,?,?,?,?)", [user, path, caption, 0, date, id], (error) => {
+        connection.query("INSERT INTO user_posts (users, files, captions, likes, dates, post_ids) VALUES (?,?,?,?,?,?)", [user, path, caption, 0, date, id], (error) => {
                 if (error) {
-                        res.status(500).json({ error: 'internal server error' });
+                        res.status(500).json({ error: 'Internal Server Error' });
                 }
                 res.json({ valid: true })
         });
@@ -138,9 +138,9 @@ app.post('/upload', upload.single('file'), (req, res) => {
 //endpoint for receiving all feed data that exists in database
 app.get("/getfeeds", (req, res) => {
         let feed = [];
-        connection.query("select users, files, captions, likes, dates, post_ids from user_posts", (error, results) => {
+        connection.query("SELECT users, files, captions, likes, dates, post_ids FROM user_posts", (error, results) => {
                 if (error) {
-                        res.status(500).json({ error: 'internal server error' });
+                        res.status(500).json({ error: 'Internal Server Error' });
                 }
                 if (results) {
                         feed = results.map(post => [post.users, post.files, post.captions, post.likes, post.dates, post.post_ids]);
@@ -158,9 +158,9 @@ app.post("/viewpost", (req, res) => {
 
 //endpoint for receiving data for a specific post
 app.get("/getpost", (req, res) => {
-        connection.query("select * from user_posts where users = ? and post_ids = ?", [req.session.viewuser, req.session.viewpost], (error, results) => {
+        connection.query("SELECT * FROM user_posts WHERE users = ? AND post_ids = ?", [req.session.viewuser, req.session.viewpost], (error, results) => {
                 if (error) {
-                        res.status(500).json({ error: 'internal server error' });
+                        res.status(500).json({ error: 'Internal Server Error' });
                 }
                 res.json({ user: results[0].users, file: results[0].files, caption: results[0].captions, date: results[0].dates })
         })
@@ -173,20 +173,20 @@ app.post("/addcomment", (req, res) => {
         const post = req.session.viewpost;
         const comment = req.body.comment;
         const date = new Date().toISOString().slice(0, 10);
-        connection.query("insert into comment_section (post_ids, commenters, comments, dates) values (?,?,?,?)", [post, commenter, comment, date], (error) => {
+        connection.query("INSERT INTO comment_section (post_ids, commenters, comments, dates) VALUES (?,?,?,?)", [post, commenter, comment, date], (error) => {
                 if (error) {
-                        res.status(500).json({ error: 'internal server error' });
+                        res.status(500).json({ error: 'Internal Server Error' });
                 }
-                connection.query("insert into notifications (users, notifications) values (?,?)", [owner, commenter + " commented on your post: "+post]);
+                connection.query("INSERT INTO notifications (users, notifications) VALUES (?,?)", [owner, commenter + " commented on your post: "+post]);
                 res.json({ date: date, commenter: commenter })
         });
 })
 
 //endpoint to receive all comment data for a specific post
 app.get("/getcomments", (req, res) => {
-        connection.query("select * from comment_section where post_ids = ?", [req.session.viewpost], (error, results) => {
+        connection.query("SELECT * FROM comment_section WHERE post_ids = ?", [req.session.viewpost], (error, results) => {
                 if (error) {
-                        res.status(500).json({ error: 'internal server error' });
+                        res.status(500).json({ error: 'Internal Server Error' });
                 }
                 const comment_data = results.map(comment => [comment.commenters, comment.comments, comment.dates]);
                 res.json(comment_data);
@@ -198,19 +198,19 @@ app.post("/likepost", (req, res) => {
         const liker = req.session.username;
         const owner = req.body.user;
         const id = req.body.id;
-        connection.query("select * from like_table where likers = ? and post_ids = ?", [liker, id], (error, results) => {
+        connection.query("SELECT * FROM like_table WHERE likers = ? AND post_ids = ?", [liker, id], (error, results) => {
                 if (error) {
-                        res.status(500).json({ error: 'internal server error' });
+                        res.status(500).json({ error: 'Internal Server Error' });
                 }
                 if (results.length > 0){
-                        connection.query("delete from like_table where likers = ? and post_ids = ?", [liker, id]);
-                        connection.query("update user_posts SET likes = likes - 1 where post_ids = ?", [id]);
+                        connection.query("DELETE FROM like_table WHERE likers = ? AND post_ids = ?", [liker, id]);
+                        connection.query("UPDATE user_posts SET likes = likes - 1 WHERE post_ids = ?", [id]);
                         res.json({valid: false})
                 }
                 else{
-                        connection.query("insert into like_table (owners, post_ids, likers) values (?,?,?)", [owner, id, liker]);
-                        connection.query("insert into notifications (users, notifications) values (?,?)", [owner, liker + " liked your post: "+id]);
-                        connection.query("update user_posts SET likes = likes + 1 where users = ? AND post_ids = ?", [owner, id]);
+                        connection.query("INSERT INTO like_table (owners, post_ids, likers) VALUES (?,?,?)", [owner, id, liker]);
+                        connection.query("INSERT INTO notifications (users, notifications) VALUES (?,?)", [owner, liker + " liked your post: "+id]);
+                        connection.query("UPDATE user_posts SET likes = likes + 1 WHERE users = ? AND post_ids = ?", [owner, id]);
                         res.json({valid: true})
                 }
         })
@@ -219,9 +219,9 @@ app.post("/likepost", (req, res) => {
 //endpoint to receive notification data for current user
 app.get("/getnotifications", (req, res) => {
         const user = req.session.username;
-        connection.query("select * from notifications where users = ?", [user], (error, results) => {
+        connection.query("SELECT * FROM notifications WHERE users = ?", [user], (error, results) => {
                 if (error) {
-                        res.status(500).json({ error: 'internal server error' });
+                        res.status(500).json({ error: 'Internal Server Error' });
                 }
                 const notifications = results.map(row => row.notifications);
                 res.json(notifications);
@@ -231,9 +231,9 @@ app.get("/getnotifications", (req, res) => {
 //endpoint to update session variables related to a user's search
 app.post("/searchusers", (req, res) => {
         const search = req.body.search + "%";
-        connection.query("select * from accounts where username like ?", [search], (error, results) => {
+        connection.query("SELECT * FROM accounts WHERE username LIKE ?", [search], (error, results) => {
                 if (error) {
-                        res.status(500).json({ error: 'internal server error' });
+                        res.status(500).json({ error: 'Internal Server Error' });
                 }
                 const usernames = results.map(user => user.username);
                 req.session.searchresults = usernames;
@@ -244,9 +244,9 @@ app.post("/searchusers", (req, res) => {
 //endpoint to receive the current user's data
 app.get("/getuserdata", (req, res) => {
         const username = req.session.username;
-        connection.query("select * from user_posts where users = ?", [username], (error, results) => {
+        connection.query("SELECT * FROM user_posts WHERE users = ?", [username], (error, results) => {
                 if (error) {
-                        res.status(500).json({ error: 'internal server error' });
+                        res.status(500).json({ error: 'Internal Server Error' });
                 }
                 const user_posts = results.map(post => [post.files, post.post_ids]);
                 res.json({user: username, posts: user_posts});
@@ -256,9 +256,9 @@ app.get("/getuserdata", (req, res) => {
 //endpoint to receive a specific user's data
 app.post("/viewprofile", (req, res) => {
         const username = req.body.username;
-        connection.query("select * from user_posts where users = ?", [username], (error, results) => {
+        connection.query("SELECT * FROM user_posts WHERE users = ?", [username], (error, results) => {
                 if (error) {
-                        res.status(500).json({ error: 'internal server error' });
+                        res.status(500).json({ error: 'Internal Server Error' });
                 }
                 const user_posts = results.map(post => [post.files, post.post_ids]);
                 res.json({user: username, posts: user_posts});
