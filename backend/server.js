@@ -24,12 +24,12 @@ const storage = multer.diskStorage({
 const upload = multer({ storage })
 
 //database connection
-const connection = sql.createConnection({host: "localhost", user: "root", password: "", database: "storage"})
-connection.connect((err) => {
-        if (err) {
-                console.error('error connecting to database: ' + err.stack);
-        }
-});
+const connection = sql.createConnection({
+        host: "localhost", 
+        user: "root", 
+        password: "", 
+        database: "storage"
+})
 
 //creates necessary tables
 connection.query("CREATE TABLE IF NOT EXISTS accounts (username varchar(255), password varchar(255), email varchar(255));", function(error, result, fields){
