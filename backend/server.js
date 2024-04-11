@@ -32,29 +32,44 @@ const connection = sql.createConnection({
 })
 
 //creates necessary tables
-connection.query("CREATE TABLE IF NOT EXISTS accounts (username varchar(255), password varchar(255), email varchar(255));", function(error, result, fields){
-        if (error){
-                console.log("failed to create table " + error.message);
-        }
-});
-connection.query("CREATE TABLE IF NOT EXISTS user_posts (users varchar(255), files varchar(255), captions text, likes int, dates varchar(255), post_ids varchar(255));", function(error, result, fields){
-        if (error){
-                console.log("failed to create table " + error.message);
-        }
-});
-connection.query("CREATE TABLE IF NOT EXISTS comment_section (commenters varchar(255), comments text, dates varchar(255), post_ids varchar(255));", function(error, result, fields){
-        if (error){
-                console.log("failed to create table " + error.message);
-        }
-});
-connection.query("CREATE TABLE IF NOT EXISTS like_table (owners varchar(255), post_ids varchar(255), likers varchar(255));", function(error, result, fields){
-        if (error){
-                console.log("failed to create table " + error.message);
-        }
-});
-connection.query("CREATE TABLE IF NOT EXISTS notifications (users varchar(255), notifications text);", function(error, result, fields){
-        if (error){
-                console.log("failed to create table " + error.message);
+const createTablesQuery = `
+        CREATE TABLE IF NOT EXISTS accounts (
+                username varchar(255),
+                password varchar(255),
+                email varchar(255)
+        );
+    
+        CREATE TABLE IF NOT EXISTS user_posts (
+                users varchar(255),
+                files varchar(255),
+                captions text,
+                likes int,
+                dates varchar(255),
+                post_ids varchar(255)
+        );
+    
+        CREATE TABLE IF NOT EXISTS comment_section (
+                commenters varchar(255),
+                comments text,
+                dates varchar(255),
+                post_ids varchar(255)
+        );
+    
+        CREATE TABLE IF NOT EXISTS like_table (
+                owners varchar(255),
+                post_ids varchar(255),
+                likers varchar(255)
+        );
+    
+        CREATE TABLE IF NOT EXISTS notifications (
+                users varchar(255),
+                notifications text
+        );
+`;
+
+connection.query(createTablesQuery, function(error, result, fields) {
+        if (error) {
+                console.log("Failed to create tables: " + error.message);
         }
 });
 
