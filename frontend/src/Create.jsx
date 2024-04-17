@@ -27,7 +27,7 @@ const Create = () => {
         .catch(error => console.error("Error fetching info:", error));
     }
 
-    //displays a box for the user to write a caption followed by a button to choose a file. Once a file is chosen, the choose file button goes away, and the file is portayed followed by a button to upload it.
+    
     return(
         <div className="create">
             <Navbar /><br></br><br></br>
