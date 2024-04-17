@@ -32,45 +32,43 @@ const connection = sql.createConnection({
 })
 
 //creates necessary tables
-const createTables = `
-        CREATE TABLE IF NOT EXISTS accounts (
-                username VARCHAR(255),
-                password VARCHAR(255),
-                email VARCHAR(255)
-        );
-    
-        CREATE TABLE IF NOT EXISTS user_posts (
-                users VARCHAR(255),
-                files VARCHAR(255),
-                captions TEXT,
-                likes INT,
-                dates VARCHAR(255),
-                post_ids VARCHAR(255)
-        );
-    
-        CREATE TABLE IF NOT EXISTS comment_section (
-                commenters VARCHAR(255),
-                comments TEXT,
-                dates VARCHAR(255),
-                post_ids VARCHAR(255)
-        );
-    
-        CREATE TABLE IF NOT EXISTS like_table (
-                owners VARCHAR(255),
-                post_ids VARCHAR(255),
-                likers VARCHAR(255)
-        );
-    
-        CREATE TABLE IF NOT EXISTS notifications (
-                users VARCHAR(255),
-                notifications TEXT
-        );
-`;
+const createTables = [
+    `CREATE TABLE IF NOT EXISTS accounts (
+        username VARCHAR(255),
+        password VARCHAR(255),
+        email VARCHAR(255)
+    );`,
+    `CREATE TABLE IF NOT EXISTS user_posts (
+        users VARCHAR(255),
+        files VARCHAR(255),
+        captions TEXT,
+        likes INT,
+        dates VARCHAR(255),
+        post_ids VARCHAR(255)
+    );`,
+    `CREATE TABLE IF NOT EXISTS comment_section (
+        commenters VARCHAR(255),
+        comments TEXT,
+        dates VARCHAR(255),
+        post_ids VARCHAR(255)
+    );`,
+    `CREATE TABLE IF NOT EXISTS like_table (
+        owners VARCHAR(255),
+        post_ids VARCHAR(255),
+        likers VARCHAR(255)
+    );`,
+    `CREATE TABLE IF NOT EXISTS notifications (
+        users VARCHAR(255),
+        notifications TEXT
+    );`
+];
 
-connection.query(createTables, function(error, result, fields) {
+createTables.forEach(query => {
+    connection.query(query, function(error, result, fields) {
         if (error) {
-                console.log("Failed to create tables: " + error.message);
+            console.log("Failed to create tables: " + error.message);
         }
+    });
 });
 
 //endpoint for storing credentials in database
