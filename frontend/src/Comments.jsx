@@ -53,7 +53,7 @@ const Comments = () => {
         fetchOldcomments();
     }, [])
 
-    //displays a loading message while the comment-data is being fetched
+    //displays a loading message if the post content is empty
     if (postcontents === null) {
         return <div>Loading...</div>;
     }
