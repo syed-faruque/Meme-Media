@@ -1,19 +1,17 @@
-//necessary imports
 import Navbar from "./Navbar";
 import {useState} from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 
-//makes credentials visible for all requests sent out by axios
 axios.defaults.withCredentials = true;
 
-//create component
+
 const Create = () => {
     const [file, setFile] = useState()
     const [caption, setCaption] = useState()
     const navigate = useNavigate()
 
-    //function for sending uploaded file to the serverside
+
     const upload = () => {
         const formData = new FormData()
         formData.append('file', file)
