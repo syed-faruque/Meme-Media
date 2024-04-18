@@ -1,19 +1,18 @@
-//necessary imports
 import { useEffect, useState } from "react";
 import axios from "axios";
 import Navbar from "./Navbar";
 
-//makes credentials visible for all requests sent out by axios
+
 axios.defaults.withCredentials = true;
 
-//comments component
+
 const Comments = () => {
     const [postcontents, setPostcontents] = useState(null);
     const [currentcomment, setCurrentcomment] = useState("");
     const [newcomments, setNewcomments] = useState([]);
     const [oldcomments, setOldcomments] = useState([]);
 
-    //function for fetching post content
+
     const fetchPostContents = () => {
         axios.get("http://192.168.0.202:1111/getpost")
             .then((response) => {
@@ -22,7 +21,7 @@ const Comments = () => {
             .catch(error => console.error("Error fetching post contents:", error));
     }
 
-    //function for fetching old comments previously made on the post
+
     const fetchOldcomments = () => {
         axios.get("http://192.168.0.202:1111/getcomments")
             .then((response) => {
@@ -31,12 +30,12 @@ const Comments = () => {
             .catch(error => console.error("Error fetching old comments:", error));
     }
 
-    //function for updating the state of the current comment when user types it
+
     const handleChange = (event) => {
         setCurrentcomment(event.target.value);
     }
 
-    //function for sending out the data for a comment made by the user to the serverside
+
     const handleSubmit = (event) => {
         event.preventDefault();
         axios.post("http://192.168.0.202:1111/addcomment", { comment: currentcomment })
@@ -47,18 +46,18 @@ const Comments = () => {
             .catch(error => console.error("Error submitting comment:", error));
     }
 
-    //initiates the fetch-related functions as soon as the component mounts
+
     useEffect(() => {
         fetchPostContents();
         fetchOldcomments();
     }, [])
 
-    //displays a loading message if the post content is empty
+
     if (postcontents === null) {
         return <div>Loading...</div>;
     }
 
-    // displays post content followed by a comment input. Then maps out new comments followed by old comments.
+
     return (
         <div className="commentsection">
             <Navbar /><br /><br />
