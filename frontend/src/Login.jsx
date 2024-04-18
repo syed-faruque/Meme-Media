@@ -1,27 +1,24 @@
-//necessary imports
 import {useState} from 'react';
 import {Link} from 'react-router-dom';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import "./Styles.css"
 
-//makes credentials visible for all requests sent out by axios
 axios.defaults.withCredentials = true;
 
-//login component
+
 const Login = () => {
     const [info, setInfo] = useState({email: "", password: ""});
     const [error, setError] = useState('');
     const navigate = useNavigate();
 
-    //function for updating the state of the email and password when the user types them in
+
     const handleChange = (event) => {
         const type = event.target.name;
         const value = event.target.value;
         setInfo(previnfo => ({...previnfo, [type]: value}))
     }
 
-    //function for sending out the credentials the user typed in the input fields to the server and then capturing its response.
     const handleSubmit = (event) => {
         event.preventDefault();
         axios.post("http://192.168.0.202:1111/login", info)
@@ -35,7 +32,6 @@ const Login = () => {
         .catch(error => console.error("Error fetching info:", error));
     }
 
-    //shows the title followed by a login form
     return(
         <div className='login'>
             <div className='loginmessage'>
