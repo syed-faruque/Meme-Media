@@ -1,4 +1,3 @@
-//imports all components
 import Login from "./Login";
 import Signup from "./Signup";
 import Success from "./Success";
@@ -10,7 +9,7 @@ import Profile from "./Profile";
 import Notifications from "./Notifications";
 import UserProfile from "./UserProfile";
 
-//creates a seperate path for each component
+
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 const App = () => {
     return(
