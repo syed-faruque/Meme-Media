@@ -1,22 +1,16 @@
-//this navigation bar will be imported into other components so that it can be displayed at the top of those pages
-
-//necessary imports
 import { Link } from 'react-router-dom';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import { useState, useEffect, useRef } from 'react';
 import "./Styles.css";
 
-//makes credentials visible for all requests sent out by axios
 axios.defaults.withCredentials = true;
 
-//navbar component
 const Navbar = () => {
     const navigate = useNavigate();
     const [search, setSearch] = useState("");
     const [searchResults, setSearchResults] = useState([]);
 
-    //has an event listener listen for clicks outside of the navigation bar. It deals with this click by closing out the bar.
     useEffect(() => {
         const handleClickOutside = (event) => {
             if (!event.target.closest(".navsearchresults")){
@@ -27,7 +21,6 @@ const Navbar = () => {
         
     }, []);
 
-    //function for updating the search state when the user types in his search
     const handleChange = (event) => {
         const value = event.target.value;
         setSearch(value);
@@ -37,7 +30,6 @@ const Navbar = () => {
             })
     }
 
-    //function for sending the user's search to the serverside and then transitioning to the search results.
     const handleKeyPress = (event) => {
         if (event.key === 'Enter') {
             event.preventDefault();
@@ -55,18 +47,16 @@ const Navbar = () => {
         }
     };
 
-    //function for navigating to the profile of the person who the user picks out of the search results.
     const handleResultsClick = (index) => {
         navigate(`/${searchResults[index]}`)
         setSearchResults([]);
     }
 
-    //function for showcasing searchresults as soon as the user presses on the search bar.
+
     const handleBarClick = (event) => {
         handleChange(event);
     }
 
-    //jsx for the navbar. Contains all the buttons on the bar. Also handles how search results are mapped out.
     return (
         <div className="navbar">
             <label>Meme Media</label>
