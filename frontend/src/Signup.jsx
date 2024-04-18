@@ -1,26 +1,21 @@
-//necessary imports
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 
-//makes credentials visible for all requests sent out by axios
 axios.defaults.withCredentials = true;
 
-//signup component
 const Signup = () => {
     const [info, setInfo] = useState({ email: "", username: "", password: "", confirm: "" })
     const [error, setError] = useState('')
     const navigate = useNavigate();
 
-    //function for updating the state of the info object as the user types in the input fields
     const handleChange = (event) => {
         const type = event.target.name;
         const value = event.target.value;
         setInfo(prevInfo => ({ ...prevInfo, [type]: value }));
     }
 
-    //function for sending the credentials the user typed into the inputs to the server and then capturing its response.
     const handleSubmit = (event) => {
         event.preventDefault();
         const { email, username, password, confirm } = info;
@@ -39,7 +34,6 @@ const Signup = () => {
         }
     }
 
-    //shows the title followed by the signup form.
     return (
         <div className='signup'>
             <div className='signupmessage'>
