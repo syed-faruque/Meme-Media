@@ -1,16 +1,12 @@
-//necessary imports
 import Navbar from "./Navbar";
 import { useState, useEffect } from "react";
 import axios from "axios";
 
-//makes credentials visible for all requests sent out by axios
 axios.defaults.withCredentials = true;
 
-//notifications component
 const Notifications = () => {
     const [notifications, setNotifications] = useState([]);
 
-    //function for fetching notification data from the server
     const fetchNotifications = () => {
         axios.get("http://192.168.0.202:1111/getnotifications")
             .then((response) => {
@@ -21,12 +17,10 @@ const Notifications = () => {
             });
     };
 
-    //initiates the fetch function as soon as the component mounts
     useEffect(() => {
         fetchNotifications();
     }, []);
 
-    //maps out all the notifications
     return (
         <div className="notifications-container">
             <Navbar />
