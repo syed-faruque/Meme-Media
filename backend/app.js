@@ -1,5 +1,3 @@
-//backend API code
-
 //library imports
 const express = require("express")
 const cors = require("cors")
