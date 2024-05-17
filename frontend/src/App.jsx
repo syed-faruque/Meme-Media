@@ -1,4 +1,4 @@
-//~~~~~~~~manages routing~~~~~~~~~//
+//~~~~~~~~all my react pages~~~~~~~~~//
 
 import Login from "./Login";
 import Signup from "./Signup";
@@ -11,6 +11,7 @@ import Profile from "./Profile";
 import Notifications from "./Notifications";
 import UserProfile from "./UserProfile";
 
+//~~~~~~~~establishes routing~~~~~~~~~//
 
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 const App = () => {
