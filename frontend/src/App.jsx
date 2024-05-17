@@ -1,4 +1,4 @@
-//~~~~~~~~code for routing~~~~~~~~~//
+//~~~~~~~~manages routing~~~~~~~~~//
 
 import Login from "./Login";
 import Signup from "./Signup";
