@@ -1,4 +1,4 @@
-//~~~~~~~~all my react pages~~~~~~~~~//
+//~~~~~~~~all my pages~~~~~~~~~//
 
 import Login from "./Login";
 import Signup from "./Signup";
