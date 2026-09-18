@@ -57,6 +57,14 @@ const Navbar = () => {
         handleChange(event);
     }
 
+    const handleLogout = () => {
+        axios.post("http://localhost:1111/logout")
+            .then(() => {
+                navigate("/");
+            })
+            .catch(error => console.error("Error logging out:", error));
+    }
+
     return (
         <div className="navbar">
             <label>Meme Media</label>
@@ -72,7 +80,7 @@ const Navbar = () => {
             <Link to="/home"><button name="home">Home</button></Link>
             <Link to="/profile"><button name="profile">Profile</button></Link>
             <Link to="/notifications"><button name="notifications">Notifications</button></Link>
-            <Link to="/"><button name="logout">Logout</button></Link>
+            <button name="logout" onClick={handleLogout}>Logout</button>
         </div>
     )
 }

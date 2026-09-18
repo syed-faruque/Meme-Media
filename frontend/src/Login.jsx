@@ -1,4 +1,4 @@
-import {useState} from 'react';
+import {useState, useEffect} from 'react';
 import {Link} from 'react-router-dom';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
@@ -12,6 +12,15 @@ const Login = () => {
     const [error, setError] = useState('');
     const navigate = useNavigate();
 
+    useEffect(() => {
+        axios.get("http://localhost:1111/getinfo")
+            .then((response) => {
+                if (response.data.user) {
+                    navigate("/home");
+                }
+            })
+            .catch(error => console.error("Error fetching info:", error));
+    }, [navigate]);
 
     const handleChange = (event) => {
         const type = event.target.name;

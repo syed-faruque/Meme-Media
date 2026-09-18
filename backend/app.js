@@ -122,6 +122,18 @@ app.get('/getinfo', (req, res) => {
         res.json({ user: req.session.username, email: req.session.email })
 })
 
+//endpoint for destroying the current session
+app.post('/logout', (req, res) => {
+        req.session.destroy((err) => {
+                if (err) {
+                        res.status(500).json({ error: 'Internal Server Error' });
+                        return;
+                }
+                res.clearCookie('connect.sid');
+                res.json({ valid: true });
+        });
+})
+
 //endpoint for uploading a post
 app.post('/upload', upload.single('file'), (req, res) => {
         const user = req.session.username;
