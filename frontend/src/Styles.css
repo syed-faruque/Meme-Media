@@ -406,6 +406,31 @@ body {
     margin-bottom: 15px;
 }
 
+.notifications-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 15px;
+}
+
+.notifications-header .notifications-heading {
+    margin-bottom: 0;
+}
+
+.clear-notifications {
+    border: none;
+    background-color: #e4e6eb;
+    color: #050505;
+    padding: 8px 12px;
+    border-radius: 6px;
+    cursor: pointer;
+}
+
+.clear-notifications:hover {
+    background-color: #d8dadf;
+}
+
 .notification {
     background-color: #f0f2f5;
     padding: 15px;

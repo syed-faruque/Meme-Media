@@ -10,6 +10,7 @@ import Comments from "./Comments";
 import Profile from "./Profile";
 import Notifications from "./Notifications";
 import UserProfile from "./UserProfile";
+import RequireAuth from "./RequireAuth";
 
 //~~~~~~~~establishes routing~~~~~~~~~//
 
@@ -21,13 +22,13 @@ const App = () => {
                 <Route path = "/" element = {<Login/>}></Route>
                 <Route path = "/signup" element = {<Signup/>}></Route>
                 <Route path = "/success" element = {<Success/>}></Route>
-                <Route path = "/home" element = {<Home/>}></Route>
-                <Route path = "/create" element = {<Create/>}></Route>
-                <Route path = "/profile" element = {<Profile/>}></Route>
-                <Route path = "/search" element = {<Search/>}></Route>
-                <Route path = "/comments" element = {<Comments/>}></Route>
-                <Route path = "/notifications" element = {<Notifications/>}></Route>
-                <Route path = "/:username" element = {<UserProfile/>}></Route>
+                <Route path = "/home" element = {<RequireAuth><Home/></RequireAuth>}></Route>
+                <Route path = "/create" element = {<RequireAuth><Create/></RequireAuth>}></Route>
+                <Route path = "/profile" element = {<RequireAuth><Profile/></RequireAuth>}></Route>
+                <Route path = "/search" element = {<RequireAuth><Search/></RequireAuth>}></Route>
+                <Route path = "/comments" element = {<RequireAuth><Comments/></RequireAuth>}></Route>
+                <Route path = "/notifications" element = {<RequireAuth><Notifications/></RequireAuth>}></Route>
+                <Route path = "/:username" element = {<RequireAuth><UserProfile/></RequireAuth>}></Route>
             </Routes>
         </BrowserRouter>
     )

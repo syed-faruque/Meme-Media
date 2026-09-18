@@ -17,6 +17,16 @@ const Notifications = () => {
             });
     };
 
+    const clearNotifications = () => {
+        axios.post("http://localhost:1111/clearnotifications")
+            .then(() => {
+                setNotifications([]);
+            })
+            .catch((error) => {
+                console.error("Error clearing notifications:", error);
+            });
+    };
+
     useEffect(() => {
         fetchNotifications();
     }, []);
@@ -25,8 +35,18 @@ const Notifications = () => {
         <div className="notifications-container">
             <Navbar />
             <div className="notifications">
-                <h2 className="notifications-heading">Notifications</h2>
+                <div className="notifications-header">
+                    <h2 className="notifications-heading">Notifications</h2>
+                    {notifications.length > 0 && (
+                        <button type="button" className="clear-notifications" onClick={clearNotifications}>
+                            Clear all
+                        </button>
+                    )}
+                </div>
                 <div className="notifications-list">
+                    {notifications.length === 0 && (
+                        <div className="notification">No notifications</div>
+                    )}
                     {notifications.map((notification, index) => (
                         <div className="notification" key={index}>
                             {notification}

@@ -18,7 +18,10 @@ const Comments = () => {
             .then((response) => {
                 setPostcontents(response.data);
             })
-            .catch(error => console.error("Error fetching post contents:", error));
+            .catch(error => {
+                console.error("Error fetching post contents:", error);
+                setPostcontents(false);
+            });
     }
 
 
@@ -55,6 +58,15 @@ const Comments = () => {
 
     if (postcontents === null) {
         return <div>Loading...</div>;
+    }
+
+    if (postcontents === false) {
+        return (
+            <div className="commentsection">
+                <Navbar /><br /><br />
+                <div className="viewpost">Post not found.</div>
+            </div>
+        );
     }
 
 

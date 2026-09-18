@@ -36,7 +36,7 @@ const Create = () => {
                 </div>}
                 <div className="create-caption">
                     <textarea placeholder="Write something here..." value={caption} onChange={(event) => setCaption(event.target.value)}/><br></br>
-                    {!file && <div><input type="file" onChange={(event)=>{setFile(event.target.files[0])}}/><br></br></div>}
+                    {!file && <div><input type="file" accept="image/*" onChange={(event)=>{setFile(event.target.files[0])}}/><br></br></div>}
                     {file && <div><button type="button" onClick={upload}>UPLOAD MEME</button><br></br></div>}
                 </div>
             </div>

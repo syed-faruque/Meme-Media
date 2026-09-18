@@ -21,6 +21,11 @@ const Signup = () => {
         const { email, username, password, confirm } = info;
         const emailOk = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim());
         const usernameOk = /^[a-zA-Z0-9_]{3,30}$/.test(username.trim());
+        const reserved = ["home", "create", "profile", "search", "comments", "notifications", "signup", "success", "login", "logout", "api"];
+        if (reserved.includes(username.trim().toLowerCase())) {
+            setError("That username is reserved");
+            return;
+        }
         if (emailOk && usernameOk && password.length >= 8 && password === confirm) {
             axios.post("http://localhost:1111/signup", {
                 email: email.trim(),

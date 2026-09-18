@@ -9,11 +9,16 @@ const sql = require("mysql2");
 const multer = require("multer");
 const bcrypt = require("bcrypt");
 const uuid = require('uuid').v4;
+const path = require("path");
 const app = express();
 
 const BCRYPT_ROUNDS = 12;
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const USERNAME_REGEX = /^[a-zA-Z0-9_]{3,30}$/;
+const RESERVED_USERNAMES = new Set([
+        "home", "create", "profile", "search", "comments",
+        "notifications", "signup", "success", "login", "logout", "api",
+]);
 
 function requireAuth(req, res, next) {
         if (!req.session.username) {
@@ -49,19 +54,28 @@ app.use(express.static("assets"));
 
 //allows uploaded files to be stored in assets folder
 const storage = multer.diskStorage({
-        destination: function (req, file, cb) {return cb(null, "assets")}, 
-        filename: function (req, file, cb) {return cb(null, `${Date.now()}-${uuid()}-${file.originalname.replace(/[^a-zA-Z0-9._-]/g, "_")}`)}
+        destination: function (req, file, cb) { return cb(null, "assets") },
+        filename: function (req, file, cb) {
+                const safeName = path.basename(file.originalname).replace(/[^a-zA-Z0-9._-]/g, "_");
+                return cb(null, `${Date.now()}-${uuid()}-${safeName}`);
+        }
 })
 const upload = multer({
         storage,
         limits: { fileSize: 5 * 1024 * 1024 },
+        fileFilter: function (req, file, cb) {
+                if (!file.mimetype || !file.mimetype.startsWith("image/")) {
+                        return cb(new Error("Only image uploads are allowed"));
+                }
+                cb(null, true);
+        },
 })
 
 //database connection
 const connection = sql.createConnection({
-        host: "localhost", 
-        user: "root", 
-        password: "", 
+        host: "localhost",
+        user: "root",
+        password: "",
         database: "storage"
 })
 
@@ -73,8 +87,12 @@ connection.query(`
         email VARCHAR(255)
     );
 `);
-// bcrypt hashes need enough room if an older schema used a short column
 connection.query(`ALTER TABLE accounts MODIFY password VARCHAR(255)`);
+connection.query(`ALTER TABLE accounts MODIFY username VARCHAR(255) NOT NULL`);
+connection.query(`ALTER TABLE accounts MODIFY email VARCHAR(255) NOT NULL`);
+connection.query(`CREATE UNIQUE INDEX accounts_username_unique ON accounts (username)`, () => {});
+connection.query(`CREATE UNIQUE INDEX accounts_email_unique ON accounts (email)`, () => {});
+
 connection.query(`
     CREATE TABLE IF NOT EXISTS user_posts (
         users VARCHAR(255),
@@ -117,6 +135,9 @@ app.post('/signup', async (req, res) => {
         if (!EMAIL_REGEX.test(email) || !USERNAME_REGEX.test(username) || password.length < 8) {
                 return res.status(400).json({ valid: false, error: "Invalid email, username, or password" });
         }
+        if (RESERVED_USERNAMES.has(username.toLowerCase())) {
+                return res.status(400).json({ valid: false, error: "Username is reserved" });
+        }
 
         connection.query("SELECT email, username FROM accounts WHERE email = ? OR username = ?", [email, username], async (error, results) => {
                 if (error) {
@@ -133,9 +154,12 @@ app.post('/signup', async (req, res) => {
                                 [email, username, passwordHash],
                                 (err) => {
                                         if (err) {
+                                                if (err.code === "ER_DUP_ENTRY") {
+                                                        return res.json({ valid: false });
+                                                }
                                                 return res.status(500).json({ error: 'Internal Server Error' });
                                         }
-                                        res.json({ valid: true });
+                                        return res.json({ valid: true });
                                 }
                         );
                 } catch (hashError) {
@@ -154,8 +178,7 @@ app.post('/login', (req, res) => {
 
         connection.query("SELECT username, email, password FROM accounts WHERE email = ?", [email], async (error, results) => {
                 if (error) {
-                        res.status(500).json({ error: 'Internal Server Error' });
-                        return;
+                        return res.status(500).json({ error: 'Internal Server Error' });
                 }
                 if (results.length === 0) {
                         return res.json({ valid: false });
@@ -172,7 +195,7 @@ app.post('/login', (req, res) => {
                                 }
                                 req.session.email = results[0].email;
                                 req.session.username = results[0].username;
-                                res.json({ valid: true });
+                                return res.json({ valid: true });
                         });
                 } catch (compareError) {
                         return res.status(500).json({ error: 'Internal Server Error' });
@@ -185,67 +208,91 @@ app.get('/getinfo', (req, res) => {
         if (!req.session.username) {
                 return res.json({ user: null, email: null });
         }
-        res.json({ user: req.session.username, email: req.session.email })
+        return res.json({ user: req.session.username, email: req.session.email })
 })
+
 //endpoint for destroying the current session
 app.post('/logout', (req, res) => {
         req.session.destroy((err) => {
                 if (err) {
-                        res.status(500).json({ error: 'Internal Server Error' });
-                        return;
+                        return res.status(500).json({ error: 'Internal Server Error' });
                 }
                 res.clearCookie('connect.sid');
-                res.json({ valid: true });
+                return res.json({ valid: true });
         });
 })
 
 //endpoint for uploading a post
-app.post('/upload', requireAuth, upload.single('file'), (req, res) => {
-        if (!req.file) {
-                return res.status(400).json({ error: "No file uploaded" });
-        }
-        const user = req.session.username;
-        const path = req.file.path;
-        const caption = req.body.caption;
-        const date = new Date().toISOString().slice(0, 10);
-        const id = uuid();
-        connection.query("INSERT INTO user_posts (users, files, captions, likes, dates, post_ids) VALUES (?,?,?,?,?,?)", [user, path, caption, 0, date, id], (error) => {
-                if (error) {
-                        res.status(500).json({ error: 'Internal Server Error' });
+app.post('/upload', requireAuth, (req, res) => {
+        upload.single('file')(req, res, (uploadError) => {
+                if (uploadError) {
+                        return res.status(400).json({ error: uploadError.message || "Upload failed" });
                 }
-                res.json({ valid: true })
+                if (!req.file) {
+                        return res.status(400).json({ error: "No file uploaded" });
+                }
+                const user = req.session.username;
+                const filePath = req.file.path;
+                const caption = typeof req.body.caption === "string" ? req.body.caption : "";
+                const date = new Date().toISOString().slice(0, 10);
+                const id = uuid();
+                connection.query(
+                        "INSERT INTO user_posts (users, files, captions, likes, dates, post_ids) VALUES (?,?,?,?,?,?)",
+                        [user, filePath, caption, 0, date, id],
+                        (error) => {
+                                if (error) {
+                                        return res.status(500).json({ error: 'Internal Server Error' });
+                                }
+                                return res.json({ valid: true })
+                        }
+                );
         });
 })
 
 //endpoint for receiving all feed data that exists in database
 app.get("/getfeeds", requireAuth, (req, res) => {
-        let feed = [];
         connection.query("SELECT users, files, captions, likes, dates, post_ids FROM user_posts", (error, results) => {
                 if (error) {
-                        res.status(500).json({ error: 'Internal Server Error' });
+                        return res.status(500).json({ error: 'Internal Server Error' });
                 }
-                if (results) {
-                        feed = results.map(post => [post.users, post.files, post.captions, post.likes, post.dates, post.post_ids]);
-                }
-                res.json(feed);
+                const feed = (results || []).map(post => [post.users, post.files, post.captions, post.likes, post.dates, post.post_ids]);
+                return res.json(feed);
         })
 })
 
 //endpoint for setting session variables related to the post the user is currently viewing
 app.post("/viewpost", requireAuth, (req, res) => {
+        if (!req.body.user || !req.body.id) {
+                return res.status(400).json({ error: "Missing post reference" });
+        }
         req.session.viewuser = req.body.user;
         req.session.viewpost = req.body.id;
-        res.json({ valid: true });
+        return res.json({ valid: true });
 })
 
 //endpoint for receiving data for a specific post
 app.get("/getpost", requireAuth, (req, res) => {
-        connection.query("SELECT * FROM user_posts WHERE users = ? AND post_ids = ?", [req.session.viewuser, req.session.viewpost], (error, results) => {
-                if (error) {
-                        res.status(500).json({ error: 'Internal Server Error' });
+        if (!req.session.viewuser || !req.session.viewpost) {
+                return res.status(404).json({ error: "Post not found" });
+        }
+        connection.query(
+                "SELECT users, files, captions, dates FROM user_posts WHERE users = ? AND post_ids = ?",
+                [req.session.viewuser, req.session.viewpost],
+                (error, results) => {
+                        if (error) {
+                                return res.status(500).json({ error: 'Internal Server Error' });
+                        }
+                        if (!results || results.length === 0) {
+                                return res.status(404).json({ error: "Post not found" });
+                        }
+                        return res.json({
+                                user: results[0].users,
+                                file: results[0].files,
+                                caption: results[0].captions,
+                                date: results[0].dates,
+                        });
                 }
-                res.json({ user: results[0].users, file: results[0].files, caption: results[0].captions, date: results[0].dates })
-        })
+        )
 })
 
 //endpoint to add a comment
@@ -253,25 +300,40 @@ app.post("/addcomment", requireAuth, (req, res) => {
         const commenter = req.session.username;
         const owner = req.session.viewuser;
         const post = req.session.viewpost;
-        const comment = req.body.comment;
+        const comment = typeof req.body.comment === "string" ? req.body.comment.trim() : "";
         const date = new Date().toISOString().slice(0, 10);
-        connection.query("INSERT INTO comment_section (post_ids, commenters, comments, dates) VALUES (?,?,?,?)", [post, commenter, comment, date], (error) => {
-                if (error) {
-                        res.status(500).json({ error: 'Internal Server Error' });
+
+        if (!owner || !post || !comment) {
+                return res.status(400).json({ error: "Invalid comment" });
+        }
+
+        connection.query(
+                "INSERT INTO comment_section (post_ids, commenters, comments, dates) VALUES (?,?,?,?)",
+                [post, commenter, comment, date],
+                (error) => {
+                        if (error) {
+                                return res.status(500).json({ error: 'Internal Server Error' });
+                        }
+                        connection.query(
+                                "INSERT INTO notifications (users, notifications) VALUES (?,?)",
+                                [owner, commenter + " commented on your post: " + post]
+                        );
+                        return res.json({ date: date, commenter: commenter })
                 }
-                connection.query("INSERT INTO notifications (users, notifications) VALUES (?,?)", [owner, commenter + " commented on your post: "+post]);
-                res.json({ date: date, commenter: commenter })
-        });
+        );
 })
 
 //endpoint to receive all comment data for a specific post
 app.get("/getcomments", requireAuth, (req, res) => {
-        connection.query("SELECT * FROM comment_section WHERE post_ids = ?", [req.session.viewpost], (error, results) => {
+        if (!req.session.viewpost) {
+                return res.json([]);
+        }
+        connection.query("SELECT commenters, comments, dates FROM comment_section WHERE post_ids = ?", [req.session.viewpost], (error, results) => {
                 if (error) {
-                        res.status(500).json({ error: 'Internal Server Error' });
+                        return res.status(500).json({ error: 'Internal Server Error' });
                 }
-                const comment_data = results.map(comment => [comment.commenters, comment.comments, comment.dates]);
-                res.json(comment_data);
+                const comment_data = (results || []).map(comment => [comment.commenters, comment.comments, comment.dates]);
+                return res.json(comment_data);
         })
 })
 
@@ -280,76 +342,95 @@ app.post("/likepost", requireAuth, (req, res) => {
         const liker = req.session.username;
         const owner = req.body.user;
         const id = req.body.id;
+
+        if (!owner || !id) {
+                return res.status(400).json({ error: "Missing post reference" });
+        }
+
         connection.query("SELECT * FROM like_table WHERE likers = ? AND post_ids = ?", [liker, id], (error, results) => {
                 if (error) {
-                        res.status(500).json({ error: 'Internal Server Error' });
+                        return res.status(500).json({ error: 'Internal Server Error' });
                 }
-                if (results.length > 0){
+                if (results.length > 0) {
                         connection.query("DELETE FROM like_table WHERE likers = ? AND post_ids = ?", [liker, id]);
                         connection.query("UPDATE user_posts SET likes = likes - 1 WHERE post_ids = ?", [id]);
-                        res.json({valid: false})
+                        return res.json({ valid: false })
                 }
-                else{
-                        connection.query("INSERT INTO like_table (owners, post_ids, likers) VALUES (?,?,?)", [owner, id, liker]);
-                        connection.query("INSERT INTO notifications (users, notifications) VALUES (?,?)", [owner, liker + " liked your post: "+id]);
-                        connection.query("UPDATE user_posts SET likes = likes + 1 WHERE users = ? AND post_ids = ?", [owner, id]);
-                        res.json({valid: true})
-                }
+
+                connection.query("INSERT INTO like_table (owners, post_ids, likers) VALUES (?,?,?)", [owner, id, liker]);
+                connection.query("INSERT INTO notifications (users, notifications) VALUES (?,?)", [owner, liker + " liked your post: " + id]);
+                connection.query("UPDATE user_posts SET likes = likes + 1 WHERE users = ? AND post_ids = ?", [owner, id]);
+                return res.json({ valid: true })
         })
 })
 
 //endpoint to receive notification data for current user
 app.get("/getnotifications", requireAuth, (req, res) => {
         const user = req.session.username;
-        connection.query("SELECT * FROM notifications WHERE users = ?", [user], (error, results) => {
+        connection.query("SELECT notifications FROM notifications WHERE users = ?", [user], (error, results) => {
                 if (error) {
-                        res.status(500).json({ error: 'Internal Server Error' });
+                        return res.status(500).json({ error: 'Internal Server Error' });
                 }
-                const notifications = results.map(row => row.notifications);
-                res.json(notifications);
+                const notifications = (results || []).map(row => row.notifications);
+                return res.json(notifications);
+        })
+})
+
+//endpoint to clear notifications for current user
+app.post("/clearnotifications", requireAuth, (req, res) => {
+        const user = req.session.username;
+        connection.query("DELETE FROM notifications WHERE users = ?", [user], (error) => {
+                if (error) {
+                        return res.status(500).json({ error: 'Internal Server Error' });
+                }
+                return res.json({ valid: true });
         })
 })
 
 //endpoint to update session variables related to a user's search
 app.post("/searchusers", requireAuth, (req, res) => {
-        const search = req.body.search + "%";
+        const rawSearch = typeof req.body.search === "string" ? req.body.search.trim() : "";
+        const search = rawSearch + "%";
         connection.query("SELECT username FROM accounts WHERE username LIKE ?", [search], (error, results) => {
                 if (error) {
-                        res.status(500).json({ error: 'Internal Server Error' });
+                        return res.status(500).json({ error: 'Internal Server Error' });
                 }
-                const usernames = results.map(user => user.username);
+                const usernames = (results || []).map(user => user.username);
                 req.session.searchresults = usernames;
-                res.json(req.session.searchresults);
+                return res.json(req.session.searchresults);
         })
 })
 
 //endpoint to receive the current user's data
 app.get("/getuserdata", requireAuth, (req, res) => {
         const username = req.session.username;
-        connection.query("SELECT * FROM user_posts WHERE users = ?", [username], (error, results) => {
+        connection.query("SELECT files, post_ids FROM user_posts WHERE users = ?", [username], (error, results) => {
                 if (error) {
-                        res.status(500).json({ error: 'Internal Server Error' });
+                        return res.status(500).json({ error: 'Internal Server Error' });
                 }
-                const user_posts = results.map(post => [post.files, post.post_ids]);
-                res.json({user: username, posts: user_posts});
+                const user_posts = (results || []).map(post => [post.files, post.post_ids]);
+                return res.json({ user: username, posts: user_posts });
         })
 })
 
 //endpoint to receive a specific user's data
 app.post("/viewprofile", requireAuth, (req, res) => {
-        const username = req.body.username;
-        connection.query("SELECT * FROM user_posts WHERE users = ?", [username], (error, results) => {
+        const username = typeof req.body.username === "string" ? req.body.username.trim() : "";
+        if (!username) {
+                return res.status(400).json({ error: "Missing username" });
+        }
+        connection.query("SELECT files, post_ids FROM user_posts WHERE users = ?", [username], (error, results) => {
                 if (error) {
-                        res.status(500).json({ error: 'Internal Server Error' });
+                        return res.status(500).json({ error: 'Internal Server Error' });
                 }
-                const user_posts = results.map(post => [post.files, post.post_ids]);
-                res.json({user: username, posts: user_posts});
+                const user_posts = (results || []).map(post => [post.files, post.post_ids]);
+                return res.json({ user: username, posts: user_posts });
         })
 })
 
 //endpoint to receive search results
 app.get("/getsearchresults", requireAuth, (req, res) => {
-        res.json(req.session.searchresults);
+        return res.json(req.session.searchresults || []);
 })
 
 //allows server to listen on port 1111 on local network ip

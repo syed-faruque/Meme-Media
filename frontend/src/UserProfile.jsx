@@ -28,7 +28,7 @@ const UserProfile = () => {
     };
 
     const handleImageClick = (index) => {
-        axios.post("http://localhost:1111/viewpost", {user: username, id: userposts[index][0]})
+        axios.post("http://localhost:1111/viewpost", {user: username, id: userposts[index][1]})
         .then((response) => {
             if (response.data.valid){
                 navigate("/comments")
