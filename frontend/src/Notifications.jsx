@@ -1,14 +1,12 @@
 import Navbar from "./Navbar";
 import { useState, useEffect } from "react";
-import axios from "axios";
-
-axios.defaults.withCredentials = true;
+import axios from "./api";
 
 const Notifications = () => {
     const [notifications, setNotifications] = useState([]);
 
     const fetchNotifications = () => {
-        axios.get("http://localhost:1111/getnotifications")
+        axios.get("/getnotifications")
             .then((response) => {
                 setNotifications(response.data.reverse());
             })
@@ -18,7 +16,7 @@ const Notifications = () => {
     };
 
     const clearNotifications = () => {
-        axios.post("http://localhost:1111/clearnotifications")
+        axios.post("/clearnotifications")
             .then(() => {
                 setNotifications([]);
             })

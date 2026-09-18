@@ -1,6 +1,8 @@
 import axios from "axios";
+import { apiUrl } from "./config";
 
 axios.defaults.withCredentials = true;
+axios.defaults.baseURL = apiUrl();
 
 axios.interceptors.response.use(
     (response) => response,

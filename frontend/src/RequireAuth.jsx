@@ -1,14 +1,12 @@
 import { useEffect, useState } from "react";
 import { Navigate } from "react-router-dom";
-import axios from "axios";
-
-axios.defaults.withCredentials = true;
+import axios from "./api";
 
 const RequireAuth = ({ children }) => {
     const [status, setStatus] = useState("loading");
 
     useEffect(() => {
-        axios.get("http://localhost:1111/getinfo")
+        axios.get("/getinfo")
             .then((response) => {
                 setStatus(response.data.user ? "auth" : "guest");
             })

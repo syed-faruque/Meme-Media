@@ -1,16 +1,14 @@
 import Navbar from "./Navbar";
-import axios from "axios";
+import axios from "./api";
 import {useState, useEffect} from "react";
 import { useNavigate } from "react-router-dom";
-
-axios.defaults.withCredentials=true;
 
 const Search = () => {
     const [users, setUsers] = useState([]);
     const navigate = useNavigate();
 
     const fetchResults = () => {
-        axios.get("http://localhost:1111/getsearchresults")
+        axios.get("/getsearchresults")
         .then((response)=>{
             setUsers(response.data);
         })
@@ -38,9 +36,7 @@ const Search = () => {
                 </div>
             </div>
         </div>
-
     )
-
 }
 
 export default Search;

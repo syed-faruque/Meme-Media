@@ -1,10 +1,7 @@
-import { Link } from 'react-router-dom';
-import axios from 'axios';
-import { useNavigate } from 'react-router-dom';
-import { useState, useEffect, useRef } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+import axios from './api';
+import { useState, useEffect } from 'react';
 import "./Styles.css";
-
-axios.defaults.withCredentials = true;
 
 const Navbar = () => {
     const navigate = useNavigate();
@@ -18,13 +15,13 @@ const Navbar = () => {
             }
         }
         document.addEventListener("mousedown", handleClickOutside);
-        
+        return () => document.removeEventListener("mousedown", handleClickOutside);
     }, []);
 
     const handleChange = (event) => {
         const value = event.target.value;
         setSearch(value);
-        axios.post("http://localhost:1111/searchusers", { search: value })
+        axios.post("/searchusers", { search: value })
             .then((response) => {
                 setSearchResults(response.data);
             })
@@ -33,7 +30,7 @@ const Navbar = () => {
     const handleKeyPress = (event) => {
         if (event.key === 'Enter') {
             event.preventDefault();
-            axios.post("http://localhost:1111/searchusers", { search: search })
+            axios.post("/searchusers", { search: search })
             .then((response) => {
                 if (response.data) {
                     if (window.location.pathname === '/search') {
@@ -52,13 +49,12 @@ const Navbar = () => {
         setSearchResults([]);
     }
 
-
     const handleBarClick = (event) => {
         handleChange(event);
     }
 
     const handleLogout = () => {
-        axios.post("http://localhost:1111/logout")
+        axios.post("/logout")
             .then(() => {
                 navigate("/");
             })

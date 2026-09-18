@@ -1,11 +1,7 @@
-import {useState, useEffect} from 'react';
-import {Link} from 'react-router-dom';
-import { useNavigate } from 'react-router-dom';
-import axios from 'axios';
+import { useState, useEffect } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+import axios from './api';
 import "./Styles.css"
-
-axios.defaults.withCredentials = true;
-
 
 const Login = () => {
     const [info, setInfo] = useState({email: "", password: ""});
@@ -13,7 +9,7 @@ const Login = () => {
     const navigate = useNavigate();
 
     useEffect(() => {
-        axios.get("http://localhost:1111/getinfo")
+        axios.get("/getinfo")
             .then((response) => {
                 if (response.data.user) {
                     navigate("/home");
@@ -30,7 +26,7 @@ const Login = () => {
 
     const handleSubmit = (event) => {
         event.preventDefault();
-        axios.post("http://localhost:1111/login", info)
+        axios.post("/login", info)
         .then((response) => {
             if (response.data.valid){
                 navigate("/home");
@@ -59,5 +55,3 @@ const Login = () => {
     )
 }
 export default Login;
-
-

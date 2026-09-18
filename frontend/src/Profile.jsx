@@ -1,18 +1,16 @@
 import Navbar from "./Navbar";
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import axios from "axios";
-
-axios.defaults.withCredentials = true;
+import axios from "./api";
+import { mediaUrl } from "./config";
 
 const Profile = () => {
     const navigate = useNavigate();
     const [username, setUsername] = useState('');
     const [userposts, setUserposts] = useState([]);
 
-
     const fetchData = () => {
-        axios.get("http://localhost:1111/getuserdata")
+        axios.get("/getuserdata")
             .then((response) => {
                 setUsername(response.data.user);
                 setUserposts(response.data.posts.reverse());
@@ -20,7 +18,7 @@ const Profile = () => {
     }
 
     const handleImageClick = (index) => {
-        axios.post("http://localhost:1111/viewpost", {user: username, id: userposts[index][1]})
+        axios.post("/viewpost", {user: username, id: userposts[index][1]})
         .then((response) => {
             if (response.data.valid){
                 navigate("/comments")
@@ -33,7 +31,6 @@ const Profile = () => {
         fetchData();
     }, []);
 
-
     return (
         <div className="profile-container">
             <Navbar />
@@ -45,7 +42,7 @@ const Profile = () => {
                 {userposts.map((post, index) => {
                     return (
                         <div key={index} className="post-image">
-                            <img src={`http://localhost:1111/${post[0].split('/').pop()}`} alt={`Post ${index + 1}`} onClick={() => handleImageClick(index)} />
+                            <img src={mediaUrl(post[0])} alt={`Post ${index + 1}`} onClick={() => handleImageClick(index)} />
                         </div>
                     );
                 })}

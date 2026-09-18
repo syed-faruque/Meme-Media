@@ -1,9 +1,6 @@
 import { useState } from 'react';
-import { Link } from 'react-router-dom';
-import { useNavigate } from 'react-router-dom';
-import axios from 'axios';
-
-axios.defaults.withCredentials = true;
+import { Link, useNavigate } from 'react-router-dom';
+import axios from './api';
 
 const Signup = () => {
     const [info, setInfo] = useState({ email: "", username: "", password: "", confirm: "" })
@@ -27,7 +24,7 @@ const Signup = () => {
             return;
         }
         if (emailOk && usernameOk && password.length >= 8 && password === confirm) {
-            axios.post("http://localhost:1111/signup", {
+            axios.post("/signup", {
                 email: email.trim(),
                 username: username.trim(),
                 password,
@@ -63,7 +60,6 @@ const Signup = () => {
             </div>
         </div>
     )
-
 }
 
 export default Signup;

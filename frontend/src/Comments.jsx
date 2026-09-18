@@ -1,10 +1,7 @@
 import { useEffect, useState } from "react";
-import axios from "axios";
+import axios from "./api";
+import { mediaUrl } from "./config";
 import Navbar from "./Navbar";
-
-
-axios.defaults.withCredentials = true;
-
 
 const Comments = () => {
     const [postcontents, setPostcontents] = useState(null);
@@ -12,9 +9,8 @@ const Comments = () => {
     const [newcomments, setNewcomments] = useState([]);
     const [oldcomments, setOldcomments] = useState([]);
 
-
     const fetchPostContents = () => {
-        axios.get("http://localhost:1111/getpost")
+        axios.get("/getpost")
             .then((response) => {
                 setPostcontents(response.data);
             })
@@ -24,24 +20,21 @@ const Comments = () => {
             });
     }
 
-
     const fetchOldcomments = () => {
-        axios.get("http://localhost:1111/getcomments")
+        axios.get("/getcomments")
             .then((response) => {
                 setOldcomments(response.data);
             })
             .catch(error => console.error("Error fetching old comments:", error));
     }
 
-
     const handleChange = (event) => {
         setCurrentcomment(event.target.value);
     }
 
-
     const handleSubmit = (event) => {
         event.preventDefault();
-        axios.post("http://localhost:1111/addcomment", { comment: currentcomment })
+        axios.post("/addcomment", { comment: currentcomment })
             .then((response) => {
                 setNewcomments([...newcomments, [response.data.commenter, currentcomment, response.data.date]]);
                 setCurrentcomment("");
@@ -49,12 +42,10 @@ const Comments = () => {
             .catch(error => console.error("Error submitting comment:", error));
     }
 
-
     useEffect(() => {
         fetchPostContents();
         fetchOldcomments();
     }, [])
-
 
     if (postcontents === null) {
         return <div>Loading...</div>;
@@ -69,7 +60,6 @@ const Comments = () => {
         );
     }
 
-
     return (
         <div className="commentsection">
             <Navbar /><br /><br />
@@ -79,7 +69,7 @@ const Comments = () => {
                     <span className="date">{postcontents.date}</span><br></br><br></br>
                 </div>
                 <div className="post-body">
-                    <img src={`http://localhost:1111/${(postcontents.file).split('/').pop()}`} alt="post" />
+                    <img src={mediaUrl(postcontents.file)} alt="post" />
                     <p className="caption">{postcontents.caption}</p>
                 </div>
             </div>

@@ -1,31 +1,25 @@
 import Navbar from "./Navbar";
 import {useState} from "react";
-import axios from "axios";
+import axios from "./api";
 import { useNavigate } from "react-router-dom";
-
-axios.defaults.withCredentials = true;
-
 
 const Create = () => {
     const [file, setFile] = useState()
     const [caption, setCaption] = useState()
     const navigate = useNavigate()
 
-
     const upload = () => {
         const formData = new FormData()
         formData.append('file', file)
         formData.append('caption', caption)
-        axios.post("http://localhost:1111/upload", formData)
+        axios.post("/upload", formData)
         .then((response) => {
             if (response.data)
                 navigate("/home")
-            }
-        )
+        })
         .catch(error => console.error("Error fetching info:", error));
     }
 
-    
     return(
         <div className="create">
             <Navbar /><br></br><br></br>
@@ -40,7 +34,6 @@ const Create = () => {
                     {file && <div><button type="button" onClick={upload}>UPLOAD MEME</button><br></br></div>}
                 </div>
             </div>
-
         </div>
     )
 }
