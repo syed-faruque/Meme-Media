@@ -1,27 +1,61 @@
 //~~~~~~~~~~backend API code~~~~~~~~~~~~//
 
 //library imports
+require("dotenv").config();
 const express = require("express")
 const cors = require("cors")
 const session = require("express-session")
 const sql = require("mysql2");
 const multer = require("multer");
+const bcrypt = require("bcrypt");
 const uuid = require('uuid').v4;
 const app = express();
+
+const BCRYPT_ROUNDS = 12;
+const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const USERNAME_REGEX = /^[a-zA-Z0-9_]{3,30}$/;
+
+function requireAuth(req, res, next) {
+        if (!req.session.username) {
+                return res.status(401).json({ error: "Unauthorized" });
+        }
+        next();
+}
+
+function normalizeCredentials({ email, username, password }) {
+        return {
+                email: typeof email === "string" ? email.trim().toLowerCase() : "",
+                username: typeof username === "string" ? username.trim() : "",
+                password: typeof password === "string" ? password : "",
+        };
+}
 
 //middleware
 app.use(cors({ origin: ["http://localhost:5173", "http://127.0.0.1:5173"], methods: ["POST", "GET"], credentials: true }))
 app.use(express.urlencoded({ extended: true }))
-app.use(session({ secret: "secret", resave: false, saveUninitialized: false }))
-app.use(express.json())
+app.use(session({
+        secret: process.env.SESSION_SECRET || "change-me-in-production",
+        resave: false,
+        saveUninitialized: false,
+        cookie: {
+                httpOnly: true,
+                sameSite: "lax",
+                secure: false,
+                maxAge: 1000 * 60 * 60 * 24 * 7,
+        },
+}))
+app.use(express.json({ limit: "1mb" }))
 app.use(express.static("assets"));
 
 //allows uploaded files to be stored in assets folder
 const storage = multer.diskStorage({
         destination: function (req, file, cb) {return cb(null, "assets")}, 
-        filename: function (req, file, cb) {return cb(null, file.originalname)}
+        filename: function (req, file, cb) {return cb(null, `${Date.now()}-${uuid()}-${file.originalname.replace(/[^a-zA-Z0-9._-]/g, "_")}`)}
 })
-const upload = multer({ storage })
+const upload = multer({
+        storage,
+        limits: { fileSize: 5 * 1024 * 1024 },
+})
 
 //database connection
 const connection = sql.createConnection({
@@ -39,7 +73,8 @@ connection.query(`
         email VARCHAR(255)
     );
 `);
-
+// bcrypt hashes need enough room if an older schema used a short column
+connection.query(`ALTER TABLE accounts MODIFY password VARCHAR(255)`);
 connection.query(`
     CREATE TABLE IF NOT EXISTS user_posts (
         users VARCHAR(255),
@@ -76,52 +111,82 @@ connection.query(`
 `);
 
 //endpoint for storing credentials in database
-app.post('/signup', (req, res) => {
-        const email = req.body.email;
-        const username = req.body.username;
-        const password = req.body.password;
-        connection.query("SELECT * FROM accounts WHERE email = ? OR username = ?", [email, username], (error, results) => {
+app.post('/signup', async (req, res) => {
+        const { email, username, password } = normalizeCredentials(req.body);
+
+        if (!EMAIL_REGEX.test(email) || !USERNAME_REGEX.test(username) || password.length < 8) {
+                return res.status(400).json({ valid: false, error: "Invalid email, username, or password" });
+        }
+
+        connection.query("SELECT email, username FROM accounts WHERE email = ? OR username = ?", [email, username], async (error, results) => {
                 if (error) {
-                        res.status(500).json({ error: 'Internal Server Error' });
+                        return res.status(500).json({ error: 'Internal Server Error' });
                 }
                 if (results.length > 0) {
-                        res.json({ valid: false });
-                } 
-                else {
-                        connection.query("INSERT INTO accounts (email, username, password) VALUES (?, ?, ?)", [email, username, password], (err) => {
-                                if (err) {
-                                        res.status(500).json({ error: 'Internal Server Error' });
+                        return res.json({ valid: false });
+                }
+
+                try {
+                        const passwordHash = await bcrypt.hash(password, BCRYPT_ROUNDS);
+                        connection.query(
+                                "INSERT INTO accounts (email, username, password) VALUES (?, ?, ?)",
+                                [email, username, passwordHash],
+                                (err) => {
+                                        if (err) {
+                                                return res.status(500).json({ error: 'Internal Server Error' });
+                                        }
+                                        res.json({ valid: true });
                                 }
-                                res.json({ valid: true });
-                        });
+                        );
+                } catch (hashError) {
+                        return res.status(500).json({ error: 'Internal Server Error' });
                 }
         });
 });
 
 //endpoint for checking if credentials exist in database
 app.post('/login', (req, res) => {
-        const email = req.body.email;
-        const password = req.body.password;
-        connection.query("SELECT * FROM accounts WHERE email = ? AND password = ?", [email, password], (error, results) => {
+        const { email, password } = normalizeCredentials(req.body);
+
+        if (!email || !password) {
+                return res.json({ valid: false });
+        }
+
+        connection.query("SELECT username, email, password FROM accounts WHERE email = ?", [email], async (error, results) => {
                 if (error) {
                         res.status(500).json({ error: 'Internal Server Error' });
                         return;
                 }
-                if (results.length > 0) {
-                        req.session.email = email;
-                        req.session.username = results[0].username;
-                        res.json({ valid: true });
-                } else {
-                        res.json({ valid: false });
+                if (results.length === 0) {
+                        return res.json({ valid: false });
+                }
+
+                try {
+                        const match = await bcrypt.compare(password, results[0].password);
+                        if (!match) {
+                                return res.json({ valid: false });
+                        }
+                        req.session.regenerate((regenErr) => {
+                                if (regenErr) {
+                                        return res.status(500).json({ error: 'Internal Server Error' });
+                                }
+                                req.session.email = results[0].email;
+                                req.session.username = results[0].username;
+                                res.json({ valid: true });
+                        });
+                } catch (compareError) {
+                        return res.status(500).json({ error: 'Internal Server Error' });
                 }
         });
 });
 
 //endpoint for receiving information for current user
 app.get('/getinfo', (req, res) => {
+        if (!req.session.username) {
+                return res.json({ user: null, email: null });
+        }
         res.json({ user: req.session.username, email: req.session.email })
 })
-
 //endpoint for destroying the current session
 app.post('/logout', (req, res) => {
         req.session.destroy((err) => {
@@ -135,7 +200,10 @@ app.post('/logout', (req, res) => {
 })
 
 //endpoint for uploading a post
-app.post('/upload', upload.single('file'), (req, res) => {
+app.post('/upload', requireAuth, upload.single('file'), (req, res) => {
+        if (!req.file) {
+                return res.status(400).json({ error: "No file uploaded" });
+        }
         const user = req.session.username;
         const path = req.file.path;
         const caption = req.body.caption;
@@ -150,7 +218,7 @@ app.post('/upload', upload.single('file'), (req, res) => {
 })
 
 //endpoint for receiving all feed data that exists in database
-app.get("/getfeeds", (req, res) => {
+app.get("/getfeeds", requireAuth, (req, res) => {
         let feed = [];
         connection.query("SELECT users, files, captions, likes, dates, post_ids FROM user_posts", (error, results) => {
                 if (error) {
@@ -164,14 +232,14 @@ app.get("/getfeeds", (req, res) => {
 })
 
 //endpoint for setting session variables related to the post the user is currently viewing
-app.post("/viewpost", (req, res) => {
+app.post("/viewpost", requireAuth, (req, res) => {
         req.session.viewuser = req.body.user;
         req.session.viewpost = req.body.id;
         res.json({ valid: true });
 })
 
 //endpoint for receiving data for a specific post
-app.get("/getpost", (req, res) => {
+app.get("/getpost", requireAuth, (req, res) => {
         connection.query("SELECT * FROM user_posts WHERE users = ? AND post_ids = ?", [req.session.viewuser, req.session.viewpost], (error, results) => {
                 if (error) {
                         res.status(500).json({ error: 'Internal Server Error' });
@@ -181,7 +249,7 @@ app.get("/getpost", (req, res) => {
 })
 
 //endpoint to add a comment
-app.post("/addcomment", (req, res) => {
+app.post("/addcomment", requireAuth, (req, res) => {
         const commenter = req.session.username;
         const owner = req.session.viewuser;
         const post = req.session.viewpost;
@@ -197,7 +265,7 @@ app.post("/addcomment", (req, res) => {
 })
 
 //endpoint to receive all comment data for a specific post
-app.get("/getcomments", (req, res) => {
+app.get("/getcomments", requireAuth, (req, res) => {
         connection.query("SELECT * FROM comment_section WHERE post_ids = ?", [req.session.viewpost], (error, results) => {
                 if (error) {
                         res.status(500).json({ error: 'Internal Server Error' });
@@ -208,7 +276,7 @@ app.get("/getcomments", (req, res) => {
 })
 
 //endpoint that manages updating like value when the user likes a post
-app.post("/likepost", (req, res) => {
+app.post("/likepost", requireAuth, (req, res) => {
         const liker = req.session.username;
         const owner = req.body.user;
         const id = req.body.id;
@@ -231,7 +299,7 @@ app.post("/likepost", (req, res) => {
 })
 
 //endpoint to receive notification data for current user
-app.get("/getnotifications", (req, res) => {
+app.get("/getnotifications", requireAuth, (req, res) => {
         const user = req.session.username;
         connection.query("SELECT * FROM notifications WHERE users = ?", [user], (error, results) => {
                 if (error) {
@@ -243,9 +311,9 @@ app.get("/getnotifications", (req, res) => {
 })
 
 //endpoint to update session variables related to a user's search
-app.post("/searchusers", (req, res) => {
+app.post("/searchusers", requireAuth, (req, res) => {
         const search = req.body.search + "%";
-        connection.query("SELECT * FROM accounts WHERE username LIKE ?", [search], (error, results) => {
+        connection.query("SELECT username FROM accounts WHERE username LIKE ?", [search], (error, results) => {
                 if (error) {
                         res.status(500).json({ error: 'Internal Server Error' });
                 }
@@ -256,7 +324,7 @@ app.post("/searchusers", (req, res) => {
 })
 
 //endpoint to receive the current user's data
-app.get("/getuserdata", (req, res) => {
+app.get("/getuserdata", requireAuth, (req, res) => {
         const username = req.session.username;
         connection.query("SELECT * FROM user_posts WHERE users = ?", [username], (error, results) => {
                 if (error) {
@@ -268,7 +336,7 @@ app.get("/getuserdata", (req, res) => {
 })
 
 //endpoint to receive a specific user's data
-app.post("/viewprofile", (req, res) => {
+app.post("/viewprofile", requireAuth, (req, res) => {
         const username = req.body.username;
         connection.query("SELECT * FROM user_posts WHERE users = ?", [username], (error, results) => {
                 if (error) {
@@ -280,7 +348,7 @@ app.post("/viewprofile", (req, res) => {
 })
 
 //endpoint to receive search results
-app.get("/getsearchresults", (req, res) => {
+app.get("/getsearchresults", requireAuth, (req, res) => {
         res.json(req.session.searchresults);
 })
 

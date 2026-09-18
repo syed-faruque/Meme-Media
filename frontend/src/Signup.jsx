@@ -19,8 +19,14 @@ const Signup = () => {
     const handleSubmit = (event) => {
         event.preventDefault();
         const { email, username, password, confirm } = info;
-        if ((email.length > 0) && (username.length > 0) && (password.length > 5) && (password === confirm)) {
-            axios.post("http://localhost:1111/signup", info)
+        const emailOk = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim());
+        const usernameOk = /^[a-zA-Z0-9_]{3,30}$/.test(username.trim());
+        if (emailOk && usernameOk && password.length >= 8 && password === confirm) {
+            axios.post("http://localhost:1111/signup", {
+                email: email.trim(),
+                username: username.trim(),
+                password,
+            })
                 .then((response) => {
                     if (response.data.valid) {
                         navigate("/success");
@@ -30,7 +36,7 @@ const Signup = () => {
                 })
                 .catch(error => console.error("Error fetching info:", error));
         } else {
-            setError("You didn't enter an email/username, your password was too small, or it didn't match confirm")
+            setError("Use a valid email, a 3-30 character username (letters/numbers/_), and a password of at least 8 characters that matches confirm")
         }
     }
 
