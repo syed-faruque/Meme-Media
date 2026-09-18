@@ -20,7 +20,7 @@ const Signup = () => {
         event.preventDefault();
         const { email, username, password, confirm } = info;
         if ((email.length > 0) && (username.length > 0) && (password.length > 5) && (password === confirm)) {
-            axios.post("http://192.168.0.202:1111/signup", info)
+            axios.post("http://localhost:1111/signup", info)
                 .then((response) => {
                     if (response.data.valid) {
                         navigate("/success");

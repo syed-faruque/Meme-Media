@@ -17,7 +17,7 @@ const UserProfile = () => {
     }, [username]);
 
     const fetchData = (username) => {
-        axios.post("http://192.168.0.202:1111/viewprofile", { username })
+        axios.post("http://localhost:1111/viewprofile", { username })
             .then((response) => {
                 setUsernameFromParams(response.data.user);
                 setUserposts(response.data.posts.reverse());
@@ -28,7 +28,7 @@ const UserProfile = () => {
     };
 
     const handleImageClick = (index) => {
-        axios.post("http://192.168.0.202:1111/viewpost", {user: username, id: userposts[index][0]})
+        axios.post("http://localhost:1111/viewpost", {user: username, id: userposts[index][0]})
         .then((response) => {
             if (response.data.valid){
                 navigate("/comments")
@@ -48,7 +48,7 @@ const UserProfile = () => {
                 {userposts.map((post, index) => {
                     return (
                         <div key={index} className="post-image">
-                            <img src={`http://192.168.0.202:1111/${post[0].split('/').pop()}`} alt={`Post ${index + 1}`} onClick={() => handleImageClick(index)} />
+                            <img src={`http://localhost:1111/${post[0].split('/').pop()}`} alt={`Post ${index + 1}`} onClick={() => handleImageClick(index)} />
                         </div>
                     );
                 })}

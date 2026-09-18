@@ -24,7 +24,7 @@ const Navbar = () => {
     const handleChange = (event) => {
         const value = event.target.value;
         setSearch(value);
-        axios.post("http://192.168.0.202:1111/searchusers", { search: value })
+        axios.post("http://localhost:1111/searchusers", { search: value })
             .then((response) => {
                 setSearchResults(response.data);
             })
@@ -33,7 +33,7 @@ const Navbar = () => {
     const handleKeyPress = (event) => {
         if (event.key === 'Enter') {
             event.preventDefault();
-            axios.post("http://192.168.0.202:1111/searchusers", { search: search })
+            axios.post("http://localhost:1111/searchusers", { search: search })
             .then((response) => {
                 if (response.data) {
                     if (window.location.pathname === '/search') {

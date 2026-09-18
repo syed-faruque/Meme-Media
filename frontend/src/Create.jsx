@@ -16,7 +16,7 @@ const Create = () => {
         const formData = new FormData()
         formData.append('file', file)
         formData.append('caption', caption)
-        axios.post("http://192.168.0.202:1111/upload", formData)
+        axios.post("http://localhost:1111/upload", formData)
         .then((response) => {
             if (response.data)
                 navigate("/home")

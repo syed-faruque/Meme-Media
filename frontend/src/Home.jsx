@@ -13,7 +13,7 @@ const Home = () => {
 
 
     const getFeeds = () => {
-        axios.get("http://192.168.0.202:1111/getfeeds")
+        axios.get("http://localhost:1111/getfeeds")
         .then((response) => {
             setFeeds(response.data.slice().reverse());
         })
@@ -26,7 +26,7 @@ const Home = () => {
 
 
     const handleViewPost = (index) => {
-        axios.post("http://192.168.0.202:1111/viewpost", {user: feeds[index][0], id: feeds[index][5]})
+        axios.post("http://localhost:1111/viewpost", {user: feeds[index][0], id: feeds[index][5]})
         .then((response) => {
             if (response.data.valid){
                 navigate("/comments")
@@ -38,7 +38,7 @@ const Home = () => {
 
 
     const handleLike = (index) => {
-        axios.post("http://192.168.0.202:1111/likepost", {user: feeds[index][0], id: feeds[index][5]})
+        axios.post("http://localhost:1111/likepost", {user: feeds[index][0], id: feeds[index][5]})
         .then((response) => {
             if (response.data.valid){
                 const newfeeds = feeds.slice();
@@ -65,7 +65,7 @@ const Home = () => {
                             <span className="date">{feed[4]}</span><br></br><br></br>
                         </div>
                         <div className="post-body">
-                            <img src={`http://192.168.0.202:1111/${feed[1].split('/').pop()}`} alt="post" /><br/>
+                            <img src={`http://localhost:1111/${feed[1].split('/').pop()}`} alt="post" /><br/>
                             <span className="like-num">{feed[3]} likes</span><br></br>
                             <p className="caption">{feed[2]}</p>
                         </div>

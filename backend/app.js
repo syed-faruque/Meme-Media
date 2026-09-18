@@ -10,7 +10,7 @@ const uuid = require('uuid').v4;
 const app = express();
 
 //middleware
-app.use(cors({ origin: ["http://192.168.0.202:5173"], methods: ["POST", "GET"], credentials: true }))
+app.use(cors({ origin: ["http://localhost:5173", "http://127.0.0.1:5173"], methods: ["POST", "GET"], credentials: true }))
 app.use(express.urlencoded({ extended: true }))
 app.use(session({ secret: "secret", resave: false, saveUninitialized: false }))
 app.use(express.json())

@@ -14,7 +14,7 @@ const Comments = () => {
 
 
     const fetchPostContents = () => {
-        axios.get("http://192.168.0.202:1111/getpost")
+        axios.get("http://localhost:1111/getpost")
             .then((response) => {
                 setPostcontents(response.data);
             })
@@ -23,7 +23,7 @@ const Comments = () => {
 
 
     const fetchOldcomments = () => {
-        axios.get("http://192.168.0.202:1111/getcomments")
+        axios.get("http://localhost:1111/getcomments")
             .then((response) => {
                 setOldcomments(response.data);
             })
@@ -38,7 +38,7 @@ const Comments = () => {
 
     const handleSubmit = (event) => {
         event.preventDefault();
-        axios.post("http://192.168.0.202:1111/addcomment", { comment: currentcomment })
+        axios.post("http://localhost:1111/addcomment", { comment: currentcomment })
             .then((response) => {
                 setNewcomments([...newcomments, [response.data.commenter, currentcomment, response.data.date]]);
                 setCurrentcomment("");
@@ -67,7 +67,7 @@ const Comments = () => {
                     <span className="date">{postcontents.date}</span><br></br><br></br>
                 </div>
                 <div className="post-body">
-                    <img src={`http://192.168.0.202:1111/${(postcontents.file).split('/').pop()}`} alt="post" />
+                    <img src={`http://localhost:1111/${(postcontents.file).split('/').pop()}`} alt="post" />
                     <p className="caption">{postcontents.caption}</p>
                 </div>
             </div>

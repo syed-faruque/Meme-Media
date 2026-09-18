@@ -21,7 +21,7 @@ const Login = () => {
 
     const handleSubmit = (event) => {
         event.preventDefault();
-        axios.post("http://192.168.0.202:1111/login", info)
+        axios.post("http://localhost:1111/login", info)
         .then((response) => {
             if (response.data.valid){
                 navigate("/home");

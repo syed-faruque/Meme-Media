@@ -10,7 +10,7 @@ const Search = () => {
     const navigate = useNavigate();
 
     const fetchResults = () => {
-        axios.get("http://192.168.0.202:1111/getsearchresults")
+        axios.get("http://localhost:1111/getsearchresults")
         .then((response)=>{
             setUsers(response.data);
         })

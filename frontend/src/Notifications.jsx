@@ -8,7 +8,7 @@ const Notifications = () => {
     const [notifications, setNotifications] = useState([]);
 
     const fetchNotifications = () => {
-        axios.get("http://192.168.0.202:1111/getnotifications")
+        axios.get("http://localhost:1111/getnotifications")
             .then((response) => {
                 setNotifications(response.data.reverse());
             })
